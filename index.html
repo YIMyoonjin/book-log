@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>북로그</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#D8D4C8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="북로그">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
@@ -56,6 +63,16 @@
   .srch-results{flex:1; min-height:0; overflow-y:auto; padding:4px 22px 24px; -webkit-overflow-scrolling:touch;}
   .srch-item{display:flex; gap:12px; padding:13px 0; border-bottom:1.5px solid var(--line); align-items:flex-start;}
   .srch-item img{width:52px; height:74px; object-fit:cover; border-radius:5px; background:#161616; flex-shrink:0;}
+  #detail-screen{position:absolute; inset:0; z-index:210; display:none; flex-direction:column; background:var(--bg);}
+  #dt-body{flex:1; min-height:0; overflow-y:auto; padding:6px 22px 28px; -webkit-overflow-scrolling:touch;}
+  .seg{display:flex; gap:8px; margin-top:8px;}
+  .seg button{flex:1; height:42px; border:1.5px solid var(--ink); border-radius:10px; background:transparent; color:var(--ink); font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;}
+  .seg button.on{background:var(--ora); border-color:var(--ora);}
+  .dt-input{width:100%; height:46px; border:1.5px solid var(--ink); border-radius:10px; padding:0 12px; font-size:15px; font-family:inherit; background:rgba(255,255,255,.45); outline:none;}
+  .dt-area{width:100%; min-height:120px; border:1.5px solid var(--ink); border-radius:10px; padding:12px; font-size:14px; font-family:inherit; background:rgba(255,255,255,.45); outline:none; resize:vertical; line-height:1.6;}
+  .dt-lab{font-size:12px; font-weight:800; color:var(--ink); margin:20px 0 6px;}
+  .star{font-size:30px; cursor:pointer; color:#C2BBAB; line-height:1;}
+  .star.on{color:var(--ora);}
 </style>
 </head>
 <body>
@@ -142,24 +159,11 @@
 
         <div class="lab" style="margin-top:24px;">지금 읽는 책</div>
         <div class="rule" style="margin-top:9px;"></div>
-        <div style="display:flex; align-items:center; gap:16px; padding:16px 0;">
-          <div class="cover" style="width:84px; height:122px; background:#161616; color:var(--bg); font-size:10px; flex-shrink:0;">해리포터와<br>마법사의 돌</div>
-          <div style="flex:1; display:flex; flex-direction:column; gap:7px;">
-            <div style="font-size:17px; font-weight:800; line-height:1.35;">해리포터와<br>마법사의 돌</div>
-            <div style="font-size:12px; color:var(--mut);">J.K. 롤링</div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;"><span class="blk">소설</span><span class="blk">메모 10</span></div>
-          </div>
-        </div>
-        <div class="rule"></div>
-        <div style="display:flex; align-items:center; gap:10px; padding:14px 0;">
-          <span class="blk">124 / 333p</span>
-          <div style="flex:1; height:7px; background:#C2BBAB; border-radius:5px; overflow:hidden;"><div style="width:37%; height:100%; background:var(--ora); border-radius:5px;"></div></div>
-          <span style="font-size:13px; font-weight:800;">37%</span>
-        </div>
+        <div id="home-current"></div>
 
         <button class="addbtn" style="margin-top:22px;" id="home-add">＋ 책 추가하기</button>
 
-        <div class="secth"><span class="disp">읽는 중</span><span class="blk">2권</span></div>
+        <div class="secth"><span class="disp">읽는 중</span><span class="blk" id="reading-count">0권</span></div>
         <div id="home-reading"></div>
 
         <div class="secth"><span class="disp">한 줄</span></div>
@@ -253,6 +257,18 @@
     <div id="srch-results" class="srch-results"></div>
   </div>
 
+  <!-- BOOK DETAIL OVERLAY -->
+  <div id="detail-screen">
+    <div class="srch-head">
+      <button class="srch-back" id="dt-back">&larr;</button>
+      <div>
+        <div class="disp" style="font-size:34px; color:var(--ora); line-height:.9;">기록</div>
+        <div class="pen" style="font-size:20px; transform:rotate(-3deg); margin-top:2px;">my note</div>
+      </div>
+    </div>
+    <div id="dt-body"></div>
+  </div>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -335,16 +351,14 @@
     var box=document.getElementById('srch-results');
     if(!q){ box.innerHTML=''; return; }
     box.innerHTML='<div style="padding:24px 0; color:#6E675B;">검색 중…</div>';
-    var base='https://www.googleapis.com/books/v1/volumes?maxResults=20&orderBy=relevance&key=AIzaSyCylNRvJZFWZIei_yvmhX8_J38sFuL-Pk8&q=';
-    function okJson(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }
-    Promise.all([
-      fetch(base+'intitle:'+encodeURIComponent(q)).then(okJson),
-      fetch(base+'inauthor:'+encodeURIComponent(q)).then(okJson)
-    ]).then(function(rs){
-      var seen={}, merged=[];
-      rs.forEach(function(d){ (d.items||[]).forEach(function(it){ var v=it.volumeInfo||{}; var k=it.id||((v.title||'')+'|'+((v.authors||[]).join(','))); if(!seen[k]){ seen[k]=1; merged.push(it); } }); });
-      renderResults(merged, q);
-    }).catch(function(e){ box.innerHTML='<div style="padding:20px 0; color:#6E675B; font-size:13px; line-height:1.6;">검색 오류: '+(e&&e.message?e.message:e)+'<br>· 파일을 <b>크롬 브라우저</b>로 열었는지 확인<br>· 인터넷 연결 확인<br>· 그래도 안 되면 “직접 등록하기” 사용</div>'; });
+    var prox='https://booklog-kakao.boy1dbswls.workers.dev/?q='+encodeURIComponent(q);
+    fetch(prox)
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(d){
+        var items=(d.documents||[]).map(function(x){ return { id:(x.isbn||x.title), volumeInfo:{ title:x.title, authors:x.authors, publisher:x.publisher, imageLinks: x.thumbnail?{thumbnail:x.thumbnail}:undefined } }; });
+        renderResults(items, q);
+      })
+      .catch(function(e){ box.innerHTML='<div style="padding:20px 0; color:#6E675B; font-size:13px; line-height:1.6;">검색 오류: '+(e&&e.message?e.message:e)+'<br>· 인터넷 연결 확인<br>· 그래도 안 되면 “직접 등록하기” 사용</div>'; });
   }
   function manualRow(){ return '<div class="srch-item manual" style="align-items:center; cursor:pointer;"><div style="width:52px; height:52px; border-radius:8px; background:#161616; color:var(--bg); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:800; flex-shrink:0;">＋</div><div style="flex:1;"><div style="font-weight:800;">찾는 책이 없나요?</div><div style="font-size:12px; color:#6E675B;">직접 등록하기</div></div></div>'; }
   function _norm(s){ return (s||'').toLowerCase().replace(/\s+/g,'').replace(/[()\[\]<>·:,.\-—_!?’'"]/g,''); }
@@ -407,10 +421,11 @@
   /* ---------- auth & data (Firebase) ---------- */
   var currentUser=null;
   function setDummyReading(){
-    var hr=document.getElementById('home-reading'); if(!hr) return; hr.innerHTML='';
-    [['해리포터와 마법사의 돌','J.K. 롤링','37%','k'],['총, 균, 쇠','재레드 다이아몬드','62%','o']].forEach(function(b){
-      hr.innerHTML+='<div class="rule" style="display:flex; align-items:center; gap:14px; padding:13px 0;">'+coverBox('',b[3],52,8).replace('height:52px','height:52px; width:38px')+'<div style="flex:1;"><div style="font-size:14px; font-weight:800;">'+b[0]+'</div><div style="font-size:11px; color:#6E675B; margin-top:2px;">'+b[1]+'</div></div><span class="blk">'+b[2]+'</span></div>';
-    });
+    var cur=document.getElementById('home-current');
+    if(cur){ cur.innerHTML='<div style="display:flex; align-items:center; gap:16px; padding:16px 0;"><div class="cover" style="width:84px; height:122px; background:#161616; color:var(--bg); font-size:10px; flex-shrink:0;">해리포터와<br>마법사의 돌</div><div style="flex:1; display:flex; flex-direction:column; gap:7px;"><div style="font-size:17px; font-weight:800; line-height:1.35;">해리포터와<br>마법사의 돌</div><div style="font-size:12px; color:var(--mut);">J.K. 롤링</div></div></div><div class="rule"></div><div style="display:flex; align-items:center; gap:10px; padding:14px 0;"><span class="blk">124 / 333p</span><div style="flex:1; height:7px; background:#C2BBAB; border-radius:5px; overflow:hidden;"><div style="width:37%; height:100%; background:var(--ora); border-radius:5px;"></div></div><span style="font-size:13px; font-weight:800;">37%</span></div>'; }
+    var hr=document.getElementById('home-reading');
+    if(hr){ hr.innerHTML=''; [['해리포터와 마법사의 돌','J.K. 롤링','37%','k'],['총, 균, 쇠','재레드 다이아몬드','62%','o']].forEach(function(b){ hr.innerHTML+='<div class="rule" style="display:flex; align-items:center; gap:14px; padding:13px 0;">'+coverBox('',b[3],52,8).replace('height:52px','height:52px; width:38px')+'<div style="flex:1;"><div style="font-size:14px; font-weight:800;">'+b[0]+'</div><div style="font-size:11px; color:#6E675B; margin-top:2px;">'+b[1]+'</div></div><span class="blk">'+b[2]+'</span></div>'; }); }
+    var rc=document.getElementById('reading-count'); if(rc) rc.textContent='2권';
   }
   function renderAccount(){
     var card=document.getElementById('account-card'); if(!card) return;
@@ -423,21 +438,82 @@
       document.getElementById('btn-login').onclick=doLogin;
     }
   }
-  function doLogin(){ try{ var p=new firebase.auth.GoogleAuthProvider(); fbAuth.signInWithPopup(p).catch(function(e){ alert('로그인 실패: '+e.message); }); }catch(e){ alert('로그인 준비 오류: '+e.message); } }
+  function doLogin(){ try{ var p=new firebase.auth.GoogleAuthProvider(); fbAuth.signInWithRedirect(p); }catch(e){ alert('로그인 준비 오류: '+e.message); } }
+  var myBooks=[];
+  function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function pctOf(b){ return b.totalPages?Math.round((b.currentPage||0)/b.totalPages*100):0; }
+  function miniCover(b,w,h){ return b.cover?'<img src="'+b.cover+'" style="width:'+w+'px; height:'+h+'px; object-fit:cover; border-radius:6px; flex-shrink:0;">':'<div style="width:'+w+'px; height:'+h+'px; border-radius:6px; background:#161616; flex-shrink:0;"></div>'; }
+  function bookRow(b){ return '<div class="rule book-item" data-id="'+b.id+'" style="display:flex; align-items:center; gap:14px; padding:13px 0; cursor:pointer;">'+miniCover(b,38,54)+'<div style="flex:1;"><div style="font-size:14px; font-weight:800;">'+esc(b.title)+'</div><div style="font-size:11px; color:#6E675B; margin-top:2px;">'+esc(b.author)+'</div></div><span class="blk">'+pctOf(b)+'%</span></div>'; }
+  function bindBookItems(){ document.querySelectorAll('.book-item').forEach(function(el){ el.onclick=function(){ openDetail(el.getAttribute('data-id')); }; }); }
+  function renderHome(){
+    var reading=myBooks.filter(function(b){return (b.status||'reading')==='reading';});
+    var cur=document.getElementById('home-current');
+    if(cur){
+      if(reading.length){ var b=reading[0]; var p=pctOf(b);
+        cur.innerHTML='<div class="book-item" data-id="'+b.id+'" style="cursor:pointer;"><div style="display:flex; align-items:center; gap:16px; padding:16px 0;">'+miniCover(b,84,122)+'<div style="flex:1; display:flex; flex-direction:column; gap:7px;"><div style="font-size:17px; font-weight:800; line-height:1.35;">'+esc(b.title)+'</div><div style="font-size:12px; color:var(--mut);">'+esc(b.author)+'</div></div></div><div class="rule"></div><div style="display:flex; align-items:center; gap:10px; padding:14px 0;"><span class="blk">'+(b.currentPage||0)+' / '+(b.totalPages||0)+'p</span><div style="flex:1; height:7px; background:#C2BBAB; border-radius:5px; overflow:hidden;"><div style="width:'+p+'%; height:100%; background:var(--ora); border-radius:5px;"></div></div><span style="font-size:13px; font-weight:800;">'+p+'%</span></div></div>';
+      } else { cur.innerHTML='<div style="padding:18px 0; color:#6E675B; font-size:13px;">읽는 중인 책이 없어요. ＋ 책 추가하기로 시작해보세요.</div>'; }
+    }
+    var hr=document.getElementById('home-reading');
+    if(hr){ hr.innerHTML = reading.length? reading.map(bookRow).join('') : '<div style="padding:12px 0; color:#6E675B; font-size:13px;">읽는 중인 책이 없어요.</div>'; }
+    var rc=document.getElementById('reading-count'); if(rc) rc.textContent=reading.length+'권';
+    bindBookItems();
+  }
+  function renderShelf(){
+    var sg=document.getElementById('shelf-grid'); if(!sg) return;
+    var done=myBooks.filter(function(b){return b.status==='done';});
+    if(!done.length){ sg.style.display='block'; sg.innerHTML='<div style="padding:14px 0; color:#6E675B; font-size:13px;">완독한 책이 여기에 쌓여요.</div>'; return; }
+    sg.style.display='grid';
+    sg.innerHTML=done.map(function(b){ return '<div class="book-item" data-id="'+b.id+'" style="cursor:pointer;">'+(b.cover?'<img src="'+b.cover+'" style="width:100%; height:112px; object-fit:cover; border-radius:9px;">':'<div style="height:112px; border-radius:9px; background:#161616;"></div>')+'<div style="font-size:10px; font-weight:700; margin-top:5px; text-align:center;">'+esc(b.title)+'</div></div>'; }).join('');
+    bindBookItems();
+  }
   function loadBooks(){
     if(!currentUser) return;
     fbDB.collection('users').doc(currentUser.uid).collection('books').orderBy('updatedAt','desc').get().then(function(snap){
-      var hr=document.getElementById('home-reading'); if(!hr) return; hr.innerHTML='';
-      if(snap.empty){ hr.innerHTML='<div style="padding:14px 0; color:#6E675B; font-size:13px;">아직 추가한 책이 없어요. ＋ 책 추가하기로 담아보세요.</div>'; return; }
-      snap.forEach(function(doc){ var b=doc.data();
-        var cover=b.cover?'<img src="'+b.cover+'" style="width:38px; height:54px; object-fit:cover; border-radius:5px; flex-shrink:0;">':'<div style="width:38px; height:54px; border-radius:5px; background:#161616; flex-shrink:0;"></div>';
-        var pct=(b.totalPages?Math.round((b.currentPage||0)/b.totalPages*100):0)+'%';
-        hr.insertAdjacentHTML('beforeend','<div class="rule" style="display:flex; align-items:center; gap:14px; padding:13px 0;">'+cover+'<div style="flex:1;"><div style="font-size:14px; font-weight:800;">'+(b.title||'')+'</div><div style="font-size:11px; color:#6E675B; margin-top:2px;">'+(b.author||'')+'</div></div><span class="blk">'+pct+'</span></div>');
-      });
+      myBooks=[]; snap.forEach(function(doc){ var d=doc.data(); d.id=doc.id; myBooks.push(d); });
+      renderHome(); renderShelf();
     }).catch(function(e){ var hr=document.getElementById('home-reading'); if(hr) hr.innerHTML='<div style="padding:14px 0; color:#6E675B; font-size:13px;">불러오기 오류: '+e.message+'</div>'; });
   }
+  /* ----- book detail ----- */
+  var dtCurrentId=null, dtStatus='reading', dtRating=0;
+  function openDetail(id){
+    var b=null; for(var i=0;i<myBooks.length;i++){ if(myBooks[i].id===id){ b=myBooks[i]; break; } }
+    if(!b) return;
+    dtCurrentId=id; dtStatus=b.status||'reading'; dtRating=b.rating||0;
+    var body=document.getElementById('dt-body');
+    body.innerHTML=''
+      +'<div style="display:flex; gap:16px; align-items:center; padding:8px 0 4px;">'+miniCover(b,76,110)+'<div style="flex:1;"><div style="font-size:18px; font-weight:800; line-height:1.35;">'+esc(b.title)+'</div><div style="font-size:12px; color:var(--mut); margin-top:4px;">'+esc(b.author)+'</div></div></div>'
+      +'<div class="dt-lab">상태</div><div class="seg" id="dt-seg"><button data-s="want">읽고 싶은</button><button data-s="reading">읽는 중</button><button data-s="done">완독</button></div>'
+      +'<div class="dt-lab">진행률</div><div style="display:flex; gap:10px; align-items:center;"><input class="dt-input" id="dt-cur" type="number" inputmode="numeric" placeholder="현재 쪽" value="'+(b.currentPage||'')+'" style="flex:1;"><span style="font-weight:800;">/</span><input class="dt-input" id="dt-total" type="number" inputmode="numeric" placeholder="전체 쪽" value="'+(b.totalPages||'')+'" style="flex:1;"><span id="dt-pct" style="font-weight:800; min-width:42px; text-align:right;">'+pctOf(b)+'%</span></div>'
+      +'<div class="dt-lab">별점</div><div id="dt-stars">'+[1,2,3,4,5].map(function(n){return '<span class="star" data-n="'+n+'">★</span>';}).join('')+'</div>'
+      +'<div class="dt-lab">독후감 · 느낀 점</div><textarea class="dt-area" id="dt-review" placeholder="이 책에서 느낀 점을 기록해보세요">'+esc(b.review||'')+'</textarea>'
+      +'<button class="addbtn" id="dt-save" style="margin-top:22px;">저장하기</button>'
+      +'<button id="dt-del" style="width:100%; height:46px; margin-top:10px; border:1.5px solid #161616; border-radius:12px; background:transparent; color:#161616; font-weight:800; font-family:inherit; cursor:pointer;">삭제</button>';
+    function paintSeg(){ document.querySelectorAll('#dt-seg button').forEach(function(x){ x.classList.toggle('on', x.getAttribute('data-s')===dtStatus); }); }
+    function paintStars(){ document.querySelectorAll('#dt-stars .star').forEach(function(x){ x.classList.toggle('on', (+x.getAttribute('data-n'))<=dtRating); }); }
+    paintSeg(); paintStars();
+    document.querySelectorAll('#dt-seg button').forEach(function(x){ x.onclick=function(){ dtStatus=x.getAttribute('data-s'); paintSeg(); }; });
+    document.querySelectorAll('#dt-stars .star').forEach(function(x){ x.onclick=function(){ dtRating=+x.getAttribute('data-n'); paintStars(); }; });
+    function recalc(){ var c=+document.getElementById('dt-cur').value||0, t=+document.getElementById('dt-total').value||0; document.getElementById('dt-pct').textContent=(t?Math.round(c/t*100):0)+'%'; }
+    document.getElementById('dt-cur').oninput=recalc; document.getElementById('dt-total').oninput=recalc;
+    document.getElementById('dt-save').onclick=saveDetail;
+    document.getElementById('dt-del').onclick=deleteDetail;
+    document.getElementById('detail-screen').style.display='flex';
+  }
+  function closeDetail(){ document.getElementById('detail-screen').style.display='none'; }
+  function saveDetail(){
+    if(!dtCurrentId||!currentUser) return;
+    var c=+document.getElementById('dt-cur').value||0, t=+document.getElementById('dt-total').value||0;
+    fbDB.collection('users').doc(currentUser.uid).collection('books').doc(dtCurrentId).update({ status:dtStatus, currentPage:c, totalPages:t, rating:dtRating, review:document.getElementById('dt-review').value||'', updatedAt:firebase.firestore.FieldValue.serverTimestamp() }).then(function(){ closeDetail(); loadBooks(); }).catch(function(e){ alert('저장 실패: '+e.message); });
+  }
+  function deleteDetail(){
+    if(!dtCurrentId||!currentUser) return;
+    if(!confirm('이 책을 삭제할까요?')) return;
+    fbDB.collection('users').doc(currentUser.uid).collection('books').doc(dtCurrentId).delete().then(function(){ closeDetail(); loadBooks(); }).catch(function(e){ alert('삭제 실패: '+e.message); });
+  }
+  document.getElementById('dt-back').onclick=closeDetail;
   if(typeof fbAuth!=='undefined' && fbAuth){
     fbAuth.onAuthStateChanged(function(u){ currentUser=u||null; renderAccount(); if(currentUser){ loadBooks(); } else if(mainInit){ setDummyReading(); } });
+    fbAuth.getRedirectResult().catch(function(e){ if(e && e.message) alert('로그인 실패: '+e.message); });
   }
   renderAccount();
 
@@ -453,6 +529,11 @@
     };
   });
 })();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function(){}); });
+  }
 </script>
 </body>
 </html>
