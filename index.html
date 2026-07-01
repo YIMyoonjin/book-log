@@ -86,28 +86,10 @@
       <div class="page">
         <div class="disp big">오늘</div>
         <div class="pen penh">what did you read?</div>
-        <div class="sub" style="margin-top:32px;">오늘 읽은 책을 가볍게 기록해요.</div>
-        <div class="lab" style="margin-top:20px;">지금 읽는 책</div>
+        <div class="sub" style="margin-top:16px;">오늘 읽은 책을 가볍게 기록해요.</div>
+        <div style="display:flex; align-items:baseline; gap:8px; margin-top:16px;"><span class="lab">지금 읽는 책</span><span class="blk">2권</span></div>
         <div class="rule" style="margin-top:9px;"></div>
-        <div style="display:flex; align-items:center; gap:18px; padding:16px 0;">
-          <div class="cover" style="width:100px; height:146px; background:#161616; color:var(--bg); font-size:11px; flex-shrink:0;">해리포터와<br>마법사의 돌</div>
-          <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
-            <div style="font-size:19px; font-weight:800; line-height:1.35;">해리포터와<br>마법사의 돌</div>
-            <div style="font-size:12px; color:var(--mut);">J.K. 롤링</div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;"><span class="blk">소설</span><span class="blk">메모 10</span></div>
-          </div>
-        </div>
-        <div class="rule"></div>
-        <div style="display:flex; align-items:center; gap:10px; padding:15px 0;">
-          <span class="blk">124 / 333p</span>
-          <div style="flex:1; height:7px; background:#C2BBAB; border-radius:5px; overflow:hidden;"><div style="width:37%; height:100%; background:var(--ora); border-radius:5px;"></div></div>
-          <span style="font-size:13px; font-weight:800;">37%</span>
-        </div>
-        <div class="rule"></div>
-        <div style="display:flex; align-items:center; padding-top:15px;">
-          <span style="font-size:12px; color:var(--mut);">시작일 2025.05.21</span>
-          <span class="blk" style="margin-left:auto;">11일째 읽는 중</span>
-        </div>
+        <div id="ob-reading"></div>
       </div>
 
       <div class="page">
@@ -133,14 +115,17 @@
       <div class="page">
         <div class="disp big">기록</div>
         <div class="pen penh">your stats</div>
-        <div class="sub" style="margin-top:26px;">한 해의 독서를 한눈에.</div>
-        <div id="ob-bars" style="display:flex; align-items:flex-end; gap:6px; height:80px; margin-top:18px;"></div>
-        <div class="rule" style="margin-top:14px;"></div>
-        <div style="display:flex; align-items:baseline; gap:8px; padding-top:14px;">
-          <span class="disp" style="font-size:54px; color:var(--ora); line-height:.9;">36</span>
-          <span style="font-size:16px; font-weight:800;">권 완독</span>
+        <div class="sub" style="margin-top:16px;">한 해의 독서를 한눈에.</div>
+        <div id="ob-bars" style="display:flex; align-items:flex-end; gap:6px; height:58px; margin-top:14px;"></div>
+        <div class="rule" style="margin-top:12px;"></div>
+        <div style="display:flex; align-items:baseline; gap:8px; padding-top:12px;">
+          <span class="disp" style="font-size:44px; color:var(--ora); line-height:.9;">36</span>
+          <span style="font-size:15px; font-weight:800;">권 완독</span>
           <span class="blk" style="margin-left:auto;">목표 120%</span>
         </div>
+        <div class="lab" style="margin-top:18px;">완독 기록</div>
+        <div class="rule" style="margin-top:9px;"></div>
+        <div id="ob-records"></div>
       </div>
 
     </div>
@@ -157,20 +142,17 @@
         <div class="pen" style="font-size:24px; transform:rotate(-3deg); margin-top:2px;">what did you read?</div>
         <div class="sub" style="margin-top:26px;">2025년 5월 21일 화요일</div>
 
-        <div class="lab" style="margin-top:24px;">지금 읽는 책</div>
+        <div style="display:flex; align-items:baseline; gap:8px; margin-top:24px;"><span class="lab">지금 읽는 책</span><span class="blk" id="reading-count">0권</span></div>
         <div class="rule" style="margin-top:9px;"></div>
         <div id="home-current"></div>
 
         <button class="addbtn" style="margin-top:22px;" id="home-add">＋ 책 추가하기</button>
 
-        <div class="secth"><span class="disp">읽는 중</span><span class="blk" id="reading-count">0권</span></div>
-        <div id="home-reading"></div>
-
-        <div class="secth"><span class="disp">한 줄</span></div>
+        <div class="secth"><span class="disp">완독</span></div>
         <div class="card" style="display:flex; gap:20px; text-align:center;">
-          <div style="flex:1;"><div class="disp" style="font-size:28px; color:var(--ora);">5</div><div style="font-size:11px; color:var(--mut); margin-top:2px;">이번 달</div></div>
-          <div style="flex:1; border-left:1.5px solid #C2BBAB; border-right:1.5px solid #C2BBAB;"><div class="disp" style="font-size:28px; color:var(--ora);">36</div><div style="font-size:11px; color:var(--mut); margin-top:2px;">올해</div></div>
-          <div style="flex:1;"><div class="disp" style="font-size:28px; color:var(--ora);">203</div><div style="font-size:11px; color:var(--mut); margin-top:2px;">전체</div></div>
+          <div style="flex:1;"><div class="disp" id="stat-month" style="font-size:28px; color:var(--ora);">0</div><div style="font-size:11px; color:var(--mut); margin-top:2px;">이번 달</div></div>
+          <div style="flex:1; border-left:1.5px solid #C2BBAB; border-right:1.5px solid #C2BBAB;"><div class="disp" id="stat-year" style="font-size:28px; color:var(--ora);">0</div><div style="font-size:11px; color:var(--mut); margin-top:2px;">올해</div></div>
+          <div style="flex:1;"><div class="disp" id="stat-all" style="font-size:28px; color:var(--ora);">0</div><div style="font-size:11px; color:var(--mut); margin-top:2px;">전체</div></div>
         </div>
       </section>
 
@@ -178,8 +160,8 @@
       <section class="view" id="view-shelf">
         <div class="disp" style="font-size:46px; color:var(--ora); line-height:.9;">서재</div>
         <div class="pen" style="font-size:24px; transform:rotate(-3deg); margin-top:2px;">my library</div>
-        <div style="display:flex; align-items:baseline; gap:8px; margin-top:26px;"><span class="sub">올해 읽은 책</span><span class="blk">36권</span></div>
-        <div id="shelf-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:20px;"></div>
+        <div style="display:flex; align-items:baseline; gap:8px; margin-top:26px;"><span class="sub">읽은 책</span><span class="blk" id="shelf-count">0권</span></div>
+        <div id="shelf-grid" style="margin-top:20px;"></div>
       </section>
 
       <!-- CALENDAR -->
@@ -187,17 +169,11 @@
         <div class="disp" style="font-size:46px; color:var(--ora); line-height:.9;">달력</div>
         <div class="pen" style="font-size:24px; transform:rotate(-3deg); margin-top:2px;">reading calendar</div>
         <div style="display:flex; align-items:center; gap:14px; margin-top:26px;">
-          <span class="lab" style="font-size:16px;">2025년 5월</span>
-          <span style="margin-left:auto; color:var(--mut); font-weight:800; cursor:pointer;">‹</span>
-          <span style="color:var(--mut); font-weight:800; cursor:pointer;">›</span>
+          <span class="lab" id="cal-month" style="font-size:16px;">달력</span>
         </div>
         <div class="rule" style="margin-top:12px;"></div>
         <div id="cal-grid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:14px;"></div>
-        <div style="margin-top:20px; display:flex; gap:12px; font-size:11px;">
-          <span><span style="display:inline-block; width:11px; height:11px; background:#161616; border-radius:3px; vertical-align:-1px;"></span> 사피엔스</span>
-          <span><span style="display:inline-block; width:11px; height:11px; background:var(--ora); border-radius:3px; vertical-align:-1px;"></span> 습관의 힘</span>
-          <span><span style="display:inline-block; width:11px; height:11px; border:1.5px solid #161616; border-radius:3px; vertical-align:-1px;"></span> 어린왕자</span>
-        </div>
+        <div id="cal-note" style="margin-top:18px; font-size:12px; color:var(--mut); line-height:1.5;"></div>
       </section>
 
       <!-- STATS -->
@@ -208,16 +184,19 @@
         <div id="stats-bars" style="display:flex; align-items:flex-end; gap:7px; height:110px; margin-top:22px;"></div>
         <div class="rule" style="margin-top:14px;"></div>
         <div style="display:flex; align-items:baseline; gap:8px; padding:16px 0;">
-          <span class="disp" style="font-size:54px; color:var(--ora); line-height:.9;">36</span>
+          <span class="disp" id="stat-done" style="font-size:54px; color:var(--ora); line-height:.9;">0</span>
           <span style="font-size:16px; font-weight:800;">권 완독</span>
-          <span class="blk" style="margin-left:auto;">목표 120%</span>
+          <span class="blk" id="stat-goal" style="margin-left:auto;">목표 0%</span>
         </div>
         <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:8px;">
-          <div class="card" style="text-align:center;"><div class="disp" style="font-size:30px; color:var(--ora);">11,240</div><div style="font-size:11px; color:var(--mut);">올해 읽은 쪽수</div></div>
-          <div class="card" style="text-align:center;"><div class="disp" style="font-size:30px; color:var(--ora);">15일</div><div style="font-size:11px; color:var(--mut);">최장 연속 독서</div></div>
-          <div class="card" style="text-align:center;"><div class="disp" style="font-size:30px; color:var(--ora);">3권</div><div style="font-size:11px; color:var(--mut);">월 평균</div></div>
-          <div class="card" style="text-align:center;"><div class="disp" style="font-size:30px; color:var(--ora);">소설</div><div style="font-size:11px; color:var(--mut);">최다 장르</div></div>
+          <div class="card" style="text-align:center;"><div class="disp" id="stat-pages" style="font-size:30px; color:var(--ora);">0</div><div style="font-size:11px; color:var(--mut);">읽은 쪽수</div></div>
+          <div class="card" style="text-align:center;"><div class="disp" id="stat-reading" style="font-size:30px; color:var(--ora);">0</div><div style="font-size:11px; color:var(--mut);">읽는 중</div></div>
+          <div class="card" style="text-align:center;"><div class="disp" id="stat-rating" style="font-size:30px; color:var(--ora);">0</div><div style="font-size:11px; color:var(--mut);">평균 별점</div></div>
+          <div class="card" style="text-align:center;"><div class="disp" id="stat-want" style="font-size:30px; color:var(--ora);">0</div><div style="font-size:11px; color:var(--mut);">읽고 싶은</div></div>
         </div>
+        <div class="lab" style="margin-top:24px;">완독 기록</div>
+        <div class="rule" style="margin-top:9px;"></div>
+        <div id="stats-records"></div>
       </section>
 
       <!-- SETTINGS -->
@@ -292,24 +271,44 @@
     var bd=type==='c'?'border:1.5px solid #161616;':'';
     return '<div class="cover" style="height:'+h+'px; background:'+bg+'; color:'+col+'; '+bd+' font-size:'+fs+'px;">'+title+'</div>';
   }
-  function buildList(el){ if(!el)return; lib.forEach(function(b){ el.innerHTML+='<div class="rule" style="display:flex; align-items:center; gap:12px; padding:13px 0;"><span class="blk">'+b[0]+'</span><span style="flex:1; font-size:15px; font-weight:800;">'+b[1]+'</span><span style="font-size:10px; color:#6E675B;">'+b[2]+'</span></div>'; }); }
-  function buildCal(el,big){ if(!el)return;
+  var oCov={hp:'https://covers.openlibrary.org/b/isbn/9780590353427-M.jpg',sapiens:'https://covers.openlibrary.org/b/isbn/9780062316097-M.jpg',habit:'https://covers.openlibrary.org/b/isbn/9780735211292-M.jpg',prince:'https://covers.openlibrary.org/b/isbn/9780156012195-M.jpg',alchemist:'https://covers.openlibrary.org/b/isbn/9780061122415-M.jpg',demian:'https://covers.openlibrary.org/b/isbn/9780486469010-M.jpg'};
+  function ocov(url,w,h,bg){ return '<div style="width:'+w+'; height:'+h+'px; border-radius:6px; overflow:hidden; background:'+(bg||'#8C8577')+'; flex-shrink:0;"><img src="'+url+'?default=false" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display=\'none\'"></div>'; }
+  function buildObReading(){
+    var el=document.getElementById('ob-reading'); if(!el) return;
+    function gp(t,c){ return '<span style="display:inline-block; background:'+c+'; color:#fff; padding:3px 9px; font-weight:800; font-size:10px; border-radius:9px;">'+t+'</span>'; }
+    var books=[{c:oCov.hp,t:'해리포터와 마법사의 돌',a:'J.K. 롤링',cur:124,tot:333,s:'2025.05.21',d:11,bg:'#6E8CA0',g:'소설',gc:'#6E8CA0',m:10},{c:oCov.sapiens,t:'사피엔스',a:'유발 하라리',cur:210,tot:443,s:'2025.05.18',d:14,bg:'#C2A05B',g:'인문',gc:'#7E8C6B',m:5}];
+    el.innerHTML=books.map(function(b){ var p=Math.round(b.cur/b.tot*100);
+      return '<div style="display:flex; gap:14px; padding:13px 0;">'+ocov(b.c,'64px',92,b.bg)+'<div style="flex:1; display:flex; flex-direction:column; gap:5px;"><div style="font-size:15px; font-weight:800; line-height:1.3;">'+b.t+'</div><div style="font-size:11px; color:var(--mut);">'+b.a+'</div><div style="display:flex; gap:5px;">'+gp(b.g,b.gc)+'<span style="display:inline-block; background:#b42700; color:#fff; padding:3px 9px; font-weight:800; font-size:10px; border-radius:9px;">메모 '+b.m+'</span></div><div style="display:flex; align-items:center; gap:8px; margin-top:1px;"><span class="blk">'+b.cur+' / '+b.tot+'p</span><div style="flex:1; height:6px; background:#C2BBAB; border-radius:4px; overflow:hidden;"><div style="width:'+p+'%; height:100%; background:var(--ora); border-radius:4px;"></div></div><span style="font-size:12px; font-weight:800;">'+p+'%</span></div><div style="display:flex; align-items:center; font-size:11px; color:var(--mut);"><span>시작 '+b.s+'</span><span class="blk" style="margin-left:auto;">'+b.d+'일째</span></div></div></div><div class="rule"></div>'; }).join('');
+  }
+  function buildList(el){ if(!el)return; el.style.marginTop='16px';
+    var items=[{c:oCov.sapiens,t:'사피엔스',a:'유발 하라리',bg:'#C2A05B'},{c:oCov.habit,t:'아주 작은 습관의 힘',a:'제임스 클리어',bg:'#6E8CA0'},{c:oCov.prince,t:'어린 왕자',a:'생텍쥐페리',bg:'#7E8C6B'},{c:oCov.alchemist,t:'연금술사',a:'파울로 코엘료',bg:'#C17A5B'},{c:oCov.demian,t:'데미안',a:'헤르만 헤세',bg:'#8A6B7A'},{c:oCov.hp,t:'해리포터',a:'J.K. 롤링',bg:'#6B2A1B'}];
+    var html='';
+    for(var i=0;i<items.length;i+=3){ html+='<div class="rule" style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:16px 0;">'+items.slice(i,i+3).map(function(b){ return '<div><div style="width:100%; height:94px; border-radius:8px; overflow:hidden; background:'+b.bg+';"><img src="'+b.c+'?default=false" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display=\'none\'"></div><div style="font-size:11px; font-weight:700; margin-top:7px; text-align:center; line-height:1.3;">'+b.t+'</div><div style="font-size:9px; color:#6E675B; text-align:center; margin-top:3px; line-height:1.3;">'+b.a+'</div></div>'; }).join('')+'</div>'; }
+    el.innerHTML=html;
+  }
+  function buildCal(el,big){ if(!el)return; el.innerHTML='';
     ['M','T','W','T','F','S','S'].forEach(function(d){el.innerHTML+='<div style="font-size:9px; text-align:center; font-weight:800;">'+d+'</div>';});
     for(var i=0;i<3;i++) el.innerHTML+='<div></div>';
-    var hh=big?30:24;
+    var hh=big?34:26;
     for(var day=1;day<=31;day++){
-      var t=null; if(day>=8&&day<=14)t='k'; else if(day>=15&&day<=19)t='o'; else if(day>=20&&day<=22)t='c';
-      var box='<div style="height:'+hh+'px;"></div>';
-      if(t){var bg=t==='k'?'#161616':t==='o'?'#F46A2A':'transparent'; var bd=t==='c'?'border:1.5px solid #161616;':''; box='<div style="height:'+hh+'px; background:'+bg+'; '+bd+' border-radius:6px; box-sizing:border-box;"></div>';}
+      var url=null; if(day>=8&&day<=14)url=oCov.sapiens; else if(day>=15&&day<=19)url=oCov.habit; else if(day>=20&&day<=22)url=oCov.prince;
+      var box=url?'<div style="height:'+hh+'px; border-radius:5px; overflow:hidden; background:#8C8577;"><img src="'+url+'?default=false" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display=\'none\'"></div>':'<div style="height:'+hh+'px;"></div>';
       el.innerHTML+='<div style="text-align:center;">'+box+'<div style="font-size:8px; margin-top:2px;">'+day+'</div></div>';
     }
   }
   function buildBars(el,h){ if(!el)return; heights.forEach(function(v,i){ el.innerHTML+='<div style="flex:1; height:'+v+'%; background:'+(i===heights.length-1?'#F46A2A':'#161616')+'; border-radius:4px 4px 0 0;"></div>'; }); }
+  function buildObRecords(){
+    var el=document.getElementById('ob-records'); if(!el) return;
+    var recs=[{t:'어린 왕자',s:'5/8',e:'5/11',d:4},{t:'아주 작은 습관의 힘',s:'5/12',e:'5/24',d:13},{t:'사피엔스',s:'5/25',e:'5/31',d:7}];
+    el.innerHTML=recs.map(function(r){ return '<div class="rule" style="display:flex; align-items:center; gap:10px; padding:11px 0;"><span style="flex:1; font-size:14px; font-weight:800;">'+r.t+'</span><span style="font-size:11px; color:var(--mut);">'+r.s+' ~ '+r.e+'</span><span class="blk">'+r.d+'일</span></div>'; }).join('');
+  }
 
   /* ---------- onboarding ---------- */
+  buildObReading();
   buildList(document.getElementById('ob-list'));
   buildCal(document.getElementById('ob-cal'),false);
   buildBars(document.getElementById('ob-bars'));
+  buildObRecords();
   var idx=0,total=4;
   var track=document.getElementById('track'), obNext=document.getElementById('ob-next'), dotsEl=document.getElementById('dots');
   function dots(){dotsEl.innerHTML=''; for(var i=0;i<total;i++){var on=i===idx; dotsEl.innerHTML+='<span style="width:'+(on?18:7)+'px; background:'+(on?'#F46A2A':'#161616')+'; opacity:'+(on?1:.3)+';"></span>';}}
@@ -329,16 +328,12 @@
   var mainInit=false;
   function initMain(){
     if(mainInit)return; mainInit=true;
-    if(currentUser){ loadBooks(); } else { setDummyReading(); }
-    var sg=document.getElementById('shelf-grid');
-    covers.forEach(function(c){ sg.innerHTML+='<div>'+coverBox(c[0],c[1],112,9)+'<div style="font-size:10px; font-weight:700; margin-top:5px; text-align:center;">'+c[0]+'</div></div>'; });
-    buildCal(document.getElementById('cal-grid'),true);
-    buildBars(document.getElementById('stats-bars'));
     var sl=document.getElementById('settings-list');
     ['알림 설정','화면 테마','데이터 백업 / 복원','공지사항','개인정보처리방침','앱 버전 1.0.0'].forEach(function(t){
       sl.innerHTML+='<div class="rule" style="display:flex; align-items:center; padding:15px 2px;"><span style="font-size:14px; font-weight:600;">'+t+'</span><span style="margin-left:auto; color:#6E675B;">›</span></div>';
     });
     document.getElementById('home-add').onclick=openSearch;
+    if(currentUser){ loadBooks(); } else { renderAll(); }
   }
 
   /* ---------- book search (Google Books) ---------- */
@@ -445,40 +440,102 @@
   function miniCover(b,w,h){ return b.cover?'<img src="'+b.cover+'" style="width:'+w+'px; height:'+h+'px; object-fit:cover; border-radius:6px; flex-shrink:0;">':'<div style="width:'+w+'px; height:'+h+'px; border-radius:6px; background:#161616; flex-shrink:0;"></div>'; }
   function bookRow(b){ return '<div class="rule book-item" data-id="'+b.id+'" style="display:flex; align-items:center; gap:14px; padding:13px 0; cursor:pointer;">'+miniCover(b,38,54)+'<div style="flex:1;"><div style="font-size:14px; font-weight:800;">'+esc(b.title)+'</div><div style="font-size:11px; color:#6E675B; margin-top:2px;">'+esc(b.author)+'</div></div><span class="blk">'+pctOf(b)+'%</span></div>'; }
   function bindBookItems(){ document.querySelectorAll('.book-item').forEach(function(el){ el.onclick=function(){ openDetail(el.getAttribute('data-id')); }; }); }
+  function startInfo(b){
+    var d=(b.createdAt&&b.createdAt.toDate)?b.createdAt.toDate():null;
+    if(!d) return {s:'',days:0};
+    function z(n){ return (n<10?'0':'')+n; }
+    return { s:d.getFullYear()+'.'+z(d.getMonth()+1)+'.'+z(d.getDate()), days:Math.max(1, Math.floor((Date.now()-d.getTime())/86400000)+1) };
+  }
+  function readingCard(b){
+    var p=pctOf(b), si=startInfo(b);
+    var memoTag=(b.memos&&b.memos.length)?'<div><span style="display:inline-block; background:#b42700; color:#fff; padding:3px 9px; font-weight:800; font-size:10px; border-radius:9px;">메모 '+b.memos.length+'</span></div>':'';
+    return '<div class="book-item" data-id="'+b.id+'" style="cursor:pointer;"><div style="display:flex; gap:14px; padding:13px 0;">'+miniCover(b,64,92)+'<div style="flex:1; display:flex; flex-direction:column; gap:6px;"><div style="font-size:15px; font-weight:800; line-height:1.3;">'+esc(b.title)+'</div><div style="font-size:11px; color:var(--mut);">'+esc(b.author)+'</div>'+memoTag+'<div style="display:flex; align-items:center; gap:8px; margin-top:2px;"><span class="blk">'+(b.currentPage||0)+' / '+(b.totalPages||0)+'p</span><div style="flex:1; height:6px; background:#C2BBAB; border-radius:4px; overflow:hidden;"><div style="width:'+p+'%; height:100%; background:var(--ora); border-radius:4px;"></div></div><span style="font-size:12px; font-weight:800;">'+p+'%</span></div>'+(si.s?'<div style="display:flex; align-items:center; font-size:11px; color:var(--mut);"><span>시작 '+si.s+'</span><span class="blk" style="margin-left:auto;">'+si.days+'일째</span></div>':'')+'</div></div><div class="rule"></div></div>';
+  }
+  function setText(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; }
+  function doneDate(b){ return (b.doneAt&&b.doneAt.toDate)?b.doneAt.toDate():null; }
   function renderHome(){
     var reading=myBooks.filter(function(b){return (b.status||'reading')==='reading';});
     var cur=document.getElementById('home-current');
-    if(cur){
-      if(reading.length){ var b=reading[0]; var p=pctOf(b);
-        cur.innerHTML='<div class="book-item" data-id="'+b.id+'" style="cursor:pointer;"><div style="display:flex; align-items:center; gap:16px; padding:16px 0;">'+miniCover(b,84,122)+'<div style="flex:1; display:flex; flex-direction:column; gap:7px;"><div style="font-size:17px; font-weight:800; line-height:1.35;">'+esc(b.title)+'</div><div style="font-size:12px; color:var(--mut);">'+esc(b.author)+'</div></div></div><div class="rule"></div><div style="display:flex; align-items:center; gap:10px; padding:14px 0;"><span class="blk">'+(b.currentPage||0)+' / '+(b.totalPages||0)+'p</span><div style="flex:1; height:7px; background:#C2BBAB; border-radius:5px; overflow:hidden;"><div style="width:'+p+'%; height:100%; background:var(--ora); border-radius:5px;"></div></div><span style="font-size:13px; font-weight:800;">'+p+'%</span></div></div>';
-      } else { cur.innerHTML='<div style="padding:18px 0; color:#6E675B; font-size:13px;">읽는 중인 책이 없어요. ＋ 책 추가하기로 시작해보세요.</div>'; }
-    }
-    var hr=document.getElementById('home-reading');
-    if(hr){ hr.innerHTML = reading.length? reading.map(bookRow).join('') : '<div style="padding:12px 0; color:#6E675B; font-size:13px;">읽는 중인 책이 없어요.</div>'; }
-    var rc=document.getElementById('reading-count'); if(rc) rc.textContent=reading.length+'권';
+    if(cur){ cur.innerHTML = reading.length? reading.map(readingCard).join('') : '<div style="padding:18px 0; color:#6E675B; font-size:13px;">읽는 중인 책이 없어요. ＋ 책 추가하기로 시작해보세요.</div>'; }
+    setText('reading-count', reading.length+'권');
+    var done=myBooks.filter(function(b){return b.status==='done';});
+    var now=new Date();
+    var monthDone=done.filter(function(b){ var d=doneDate(b); return d && d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth(); }).length;
+    var yearDone=done.filter(function(b){ var d=doneDate(b); return d && d.getFullYear()===now.getFullYear(); }).length;
+    setText('stat-month',monthDone); setText('stat-year',yearDone); setText('stat-all',done.length);
     bindBookItems();
   }
   function renderShelf(){
     var sg=document.getElementById('shelf-grid'); if(!sg) return;
     var done=myBooks.filter(function(b){return b.status==='done';});
-    if(!done.length){ sg.style.display='block'; sg.innerHTML='<div style="padding:14px 0; color:#6E675B; font-size:13px;">완독한 책이 여기에 쌓여요.</div>'; return; }
-    sg.style.display='grid';
-    sg.innerHTML=done.map(function(b){ return '<div class="book-item" data-id="'+b.id+'" style="cursor:pointer;">'+(b.cover?'<img src="'+b.cover+'" style="width:100%; height:112px; object-fit:cover; border-radius:9px;">':'<div style="height:112px; border-radius:9px; background:#161616;"></div>')+'<div style="font-size:10px; font-weight:700; margin-top:5px; text-align:center;">'+esc(b.title)+'</div></div>'; }).join('');
+    setText('shelf-count', done.length+'권');
+    sg.style.display='block';
+    if(!done.length){ sg.innerHTML='<div style="padding:16px 0; color:#6E675B; font-size:13px;">아직 읽은 책이 없어요. 책을 완독하면 여기에 표시돼요.</div>'; return; }
+    var html='';
+    for(var i=0;i<done.length;i+=3){ html+='<div class="rule" style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:16px 0;">'+done.slice(i,i+3).map(function(b){ return '<div class="book-item" data-id="'+b.id+'" style="cursor:pointer;">'+(b.cover?'<img src="'+b.cover+'" style="width:100%; height:94px; object-fit:cover; border-radius:8px;">':'<div style="height:94px; border-radius:8px; background:#161616;"></div>')+'<div style="font-size:11px; font-weight:700; margin-top:7px; text-align:center; line-height:1.3;">'+esc(b.title)+'</div><div style="font-size:9px; color:#6E675B; text-align:center; margin-top:3px; line-height:1.3;">'+esc(b.author)+'</div></div>'; }).join('')+'</div>'; }
+    sg.innerHTML=html;
     bindBookItems();
   }
+  function fmtMD(ts){ var d=(ts&&ts.toDate)?ts.toDate():null; return d?((d.getMonth()+1)+'/'+d.getDate()):'—'; }
+  function renderStats(){
+    var el=document.getElementById('stats-records'); if(!el) return;
+    var done=myBooks.filter(function(b){return b.status==='done';});
+    if(!done.length){ el.innerHTML='<div style="padding:14px 0; color:#6E675B; font-size:13px;">완독한 책이 여기에 기록돼요.</div>'; return; }
+    el.innerHTML=done.map(function(b){
+      var s=b.createdAt, e=b.doneAt, dur='';
+      if(s&&e&&s.toDate&&e.toDate){ dur=Math.max(1,Math.round((e.toDate()-s.toDate())/86400000))+'일'; }
+      return '<div class="rule book-item" data-id="'+b.id+'" style="display:flex; align-items:center; gap:10px; padding:13px 0; cursor:pointer;"><span style="flex:1; font-size:14px; font-weight:800;">'+esc(b.title)+'</span><span style="font-size:11px; color:var(--mut);">'+fmtMD(s)+' ~ '+fmtMD(e)+'</span>'+(dur?'<span class="blk">'+dur+'</span>':'')+'</div>';
+    }).join('');
+    bindBookItems();
+  }
+  function renderCalendar(){
+    var grid=document.getElementById('cal-grid'); if(!grid) return;
+    var now=new Date(), y=now.getFullYear(), m=now.getMonth();
+    setText('cal-month', y+'년 '+(m+1)+'월');
+    var map={};
+    myBooks.filter(function(b){return b.status==='done';}).forEach(function(b){ var d=doneDate(b); if(d&&d.getFullYear()===y&&d.getMonth()===m) map[d.getDate()]=b; });
+    var lead=(new Date(y,m,1).getDay()+6)%7, days=new Date(y,m+1,0).getDate(), h='';
+    ['월','화','수','목','금','토','일'].forEach(function(d){ h+='<div style="font-size:9px; text-align:center; font-weight:800;">'+d+'</div>'; });
+    for(var i=0;i<lead;i++) h+='<div></div>';
+    for(var day=1;day<=days;day++){ var b=map[day];
+      var box=b?(b.cover?'<div style="height:34px; border-radius:5px; overflow:hidden; background:#8C8577;"><img src="'+b.cover+'" style="width:100%;height:100%;object-fit:cover;display:block;"></div>':'<div style="height:34px; border-radius:5px; background:#161616;"></div>'):'<div style="height:34px;"></div>';
+      h+='<div style="text-align:center;">'+box+'<div style="font-size:8px; margin-top:2px;">'+day+'</div></div>';
+    }
+    grid.innerHTML=h;
+    setText('cal-note', Object.keys(map).length? '완독한 날에 책 표지가 표시돼요.' : '아직 완독한 책이 없어요. 책을 완독하면 그날에 표지가 표시돼요.');
+  }
+  function renderStatsTop(){
+    var done=myBooks.filter(function(b){return b.status==='done';});
+    var reading=myBooks.filter(function(b){return (b.status||'reading')==='reading';});
+    var want=myBooks.filter(function(b){return b.status==='want';});
+    setText('stat-done', done.length);
+    setText('stat-pages', done.reduce(function(s,b){return s+(b.totalPages||0);},0).toLocaleString());
+    setText('stat-reading', reading.length);
+    var rated=done.filter(function(b){return b.rating;});
+    setText('stat-rating', rated.length?(rated.reduce(function(s,b){return s+b.rating;},0)/rated.length).toFixed(1):'0');
+    setText('stat-want', want.length);
+    setText('stat-goal', '목표 '+Math.round(done.length/30*100)+'%');
+    var bars=document.getElementById('stats-bars'); if(bars){ var months=[0,0,0,0,0,0,0,0,0,0,0,0], yr=new Date().getFullYear();
+      done.forEach(function(b){ var d=doneDate(b); if(d&&d.getFullYear()===yr) months[d.getMonth()]++; });
+      var max=1; for(var i=0;i<12;i++) if(months[i]>max) max=months[i];
+      var cm=new Date().getMonth();
+      bars.innerHTML=months.map(function(v,i){ var hh=v?Math.max(8,Math.round(v/max*100)):2; return '<div style="flex:1; height:'+hh+'%; background:'+(i===cm?'#F46A2A':'#161616')+'; border-radius:4px 4px 0 0;"></div>'; }).join('');
+    }
+  }
+  function renderAll(){ renderHome(); renderShelf(); renderCalendar(); renderStatsTop(); renderStats(); }
   function loadBooks(){
-    if(!currentUser) return;
+    if(!currentUser){ renderAll(); return; }
     fbDB.collection('users').doc(currentUser.uid).collection('books').orderBy('updatedAt','desc').get().then(function(snap){
       myBooks=[]; snap.forEach(function(doc){ var d=doc.data(); d.id=doc.id; myBooks.push(d); });
-      renderHome(); renderShelf();
-    }).catch(function(e){ var hr=document.getElementById('home-reading'); if(hr) hr.innerHTML='<div style="padding:14px 0; color:#6E675B; font-size:13px;">불러오기 오류: '+e.message+'</div>'; });
+      renderAll();
+    }).catch(function(e){ var c=document.getElementById('home-current'); if(c) c.innerHTML='<div style="padding:14px 0; color:#6E675B; font-size:13px;">불러오기 오류: '+e.message+'</div>'; });
   }
   /* ----- book detail ----- */
-  var dtCurrentId=null, dtStatus='reading', dtRating=0;
+  var dtCurrentId=null, dtStatus='reading', dtRating=0, dtMemos=[], dtDoneAt=null;
   function openDetail(id){
     var b=null; for(var i=0;i<myBooks.length;i++){ if(myBooks[i].id===id){ b=myBooks[i]; break; } }
     if(!b) return;
-    dtCurrentId=id; dtStatus=b.status||'reading'; dtRating=b.rating||0;
+    dtCurrentId=id; dtStatus=b.status||'reading'; dtRating=b.rating||0; dtMemos=(b.memos||[]).slice(); dtDoneAt=b.doneAt||null;
     var body=document.getElementById('dt-body');
     body.innerHTML=''
       +'<div style="display:flex; gap:16px; align-items:center; padding:8px 0 4px;">'+miniCover(b,76,110)+'<div style="flex:1;"><div style="font-size:18px; font-weight:800; line-height:1.35;">'+esc(b.title)+'</div><div style="font-size:12px; color:var(--mut); margin-top:4px;">'+esc(b.author)+'</div></div></div>'
@@ -486,6 +543,7 @@
       +'<div class="dt-lab">진행률</div><div style="display:flex; gap:10px; align-items:center;"><input class="dt-input" id="dt-cur" type="number" inputmode="numeric" placeholder="현재 쪽" value="'+(b.currentPage||'')+'" style="flex:1;"><span style="font-weight:800;">/</span><input class="dt-input" id="dt-total" type="number" inputmode="numeric" placeholder="전체 쪽" value="'+(b.totalPages||'')+'" style="flex:1;"><span id="dt-pct" style="font-weight:800; min-width:42px; text-align:right;">'+pctOf(b)+'%</span></div>'
       +'<div class="dt-lab">별점</div><div id="dt-stars">'+[1,2,3,4,5].map(function(n){return '<span class="star" data-n="'+n+'">★</span>';}).join('')+'</div>'
       +'<div class="dt-lab">독후감 · 느낀 점</div><textarea class="dt-area" id="dt-review" placeholder="이 책에서 느낀 점을 기록해보세요">'+esc(b.review||'')+'</textarea>'
+      +'<div class="dt-lab">메모 <span id="memo-count">('+dtMemos.length+')</span></div><div id="memo-list"></div><div style="display:flex; gap:8px; margin-top:8px;"><input class="dt-input" id="memo-input" placeholder="메모를 입력하고 추가" style="flex:1;"><button id="memo-add" class="blk" style="border:none; height:46px; padding:0 16px; cursor:pointer; font-size:13px;">추가</button></div>'
       +'<button class="addbtn" id="dt-save" style="margin-top:22px;">저장하기</button>'
       +'<button id="dt-del" style="width:100%; height:46px; margin-top:10px; border:1.5px solid #161616; border-radius:12px; background:transparent; color:#161616; font-weight:800; font-family:inherit; cursor:pointer;">삭제</button>';
     function paintSeg(){ document.querySelectorAll('#dt-seg button').forEach(function(x){ x.classList.toggle('on', x.getAttribute('data-s')===dtStatus); }); }
@@ -495,6 +553,16 @@
     document.querySelectorAll('#dt-stars .star').forEach(function(x){ x.onclick=function(){ dtRating=+x.getAttribute('data-n'); paintStars(); }; });
     function recalc(){ var c=+document.getElementById('dt-cur').value||0, t=+document.getElementById('dt-total').value||0; document.getElementById('dt-pct').textContent=(t?Math.round(c/t*100):0)+'%'; }
     document.getElementById('dt-cur').oninput=recalc; document.getElementById('dt-total').oninput=recalc;
+    function renderMemos(){
+      var list=document.getElementById('memo-list'); document.getElementById('memo-count').textContent='('+dtMemos.length+')';
+      if(!dtMemos.length){ list.innerHTML='<div style="font-size:12px; color:#6E675B; padding:8px 0;">아직 메모가 없어요.</div>'; return; }
+      list.innerHTML=dtMemos.map(function(m,i){ return '<div class="rule" style="display:flex; gap:10px; align-items:flex-start; padding:10px 0;"><div style="flex:1;"><div style="font-size:13px; line-height:1.5;">'+esc(m.text)+'</div><div style="font-size:10px; color:#6E675B; margin-top:3px;">'+esc(m.at||'')+'</div></div><span class="memo-del" data-i="'+i+'" style="cursor:pointer; color:#b42700; font-weight:800; font-size:18px; line-height:1;">×</span></div>'; }).join('');
+      document.querySelectorAll('.memo-del').forEach(function(x){ x.onclick=function(){ dtMemos.splice(+x.getAttribute('data-i'),1); renderMemos(); }; });
+    }
+    function addMemo(){ var inp=document.getElementById('memo-input'); var v=inp.value.trim(); if(!v) return; var d=new Date(); dtMemos.unshift({text:v, at:d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()}); inp.value=''; renderMemos(); }
+    document.getElementById('memo-add').onclick=addMemo;
+    document.getElementById('memo-input').addEventListener('keydown',function(e){ if(e.key==='Enter') addMemo(); });
+    renderMemos();
     document.getElementById('dt-save').onclick=saveDetail;
     document.getElementById('dt-del').onclick=deleteDetail;
     document.getElementById('detail-screen').style.display='flex';
@@ -503,7 +571,9 @@
   function saveDetail(){
     if(!dtCurrentId||!currentUser) return;
     var c=+document.getElementById('dt-cur').value||0, t=+document.getElementById('dt-total').value||0;
-    fbDB.collection('users').doc(currentUser.uid).collection('books').doc(dtCurrentId).update({ status:dtStatus, currentPage:c, totalPages:t, rating:dtRating, review:document.getElementById('dt-review').value||'', updatedAt:firebase.firestore.FieldValue.serverTimestamp() }).then(function(){ closeDetail(); loadBooks(); }).catch(function(e){ alert('저장 실패: '+e.message); });
+    var upd={ status:dtStatus, currentPage:c, totalPages:t, rating:dtRating, review:document.getElementById('dt-review').value||'', memos:dtMemos, updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
+    if(dtStatus==='done'){ upd.doneAt = dtDoneAt || firebase.firestore.FieldValue.serverTimestamp(); }
+    fbDB.collection('users').doc(currentUser.uid).collection('books').doc(dtCurrentId).update(upd).then(function(){ closeDetail(); loadBooks(); }).catch(function(e){ alert('저장 실패: '+e.message); });
   }
   function deleteDetail(){
     if(!dtCurrentId||!currentUser) return;
@@ -512,7 +582,7 @@
   }
   document.getElementById('dt-back').onclick=closeDetail;
   if(typeof fbAuth!=='undefined' && fbAuth){
-    fbAuth.onAuthStateChanged(function(u){ currentUser=u||null; renderAccount(); if(currentUser){ loadBooks(); } else if(mainInit){ setDummyReading(); } });
+    fbAuth.onAuthStateChanged(function(u){ currentUser=u||null; renderAccount(); if(mainInit){ myBooks=[]; loadBooks(); } });
     fbAuth.getRedirectResult().catch(function(e){ if(e && e.message) alert('로그인 실패: '+e.message); });
   }
   renderAccount();
