@@ -562,4 +562,58 @@
     document.getElementById('dt-cur').oninput=recalc; document.getElementById('dt-total').oninput=recalc;
     function renderMemos(){
       var list=document.getElementById('memo-list'); document.getElementById('memo-count').textContent='('+dtMemos.length+')';
-      if(!dtMemos.length){ list.innerHTML='<div style="font-size:12px; color:#6E675B; padding:8px 0;">아�
+      if(!dtMemos.length){ list.innerHTML='<div style="font-size:12px; color:#6E675B; padding:8px 0;">아직 메모가 없어요.</div>'; }
+      else { list.innerHTML=dtMemos.map(function(m,i){ return '<div class="rule" style="display:flex; gap:10px; align-items:flex-start; padding:10px 0;"><div style="flex:1;"><div style="font-size:13px; line-height:1.5;">'+esc(m.text)+'</div><div style="font-size:10px; color:#6E675B; margin-top:3px;">'+esc(m.at||'')+'</div></div><span class="memo-del" data-i="'+i+'" style="cursor:pointer; color:#b42700; font-weight:800; font-size:18px; line-height:1;">×</span></div>'; }).join('');
+        document.querySelectorAll('.memo-del').forEach(function(x){ x.onclick=function(){ dtMemos.splice(+x.getAttribute('data-i'),1); renderMemos(); }; }); }
+      var full=dtMemos.length>=5;
+      var ar=document.getElementById('memo-add-row'); if(ar) ar.style.display=full?'none':'flex';
+      var mf=document.getElementById('memo-full'); if(mf) mf.style.display=full?'block':'none';
+    }
+    function addMemo(){ if(dtMemos.length>=5) return; var inp=document.getElementById('memo-input'); var v=inp.value.trim(); if(!v) return; var d=new Date(); dtMemos.unshift({text:v, at:d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()}); inp.value=''; renderMemos(); }
+    document.getElementById('memo-add').onclick=addMemo;
+    document.getElementById('memo-input').addEventListener('keydown',function(e){ if(e.key==='Enter') addMemo(); });
+    renderMemos();
+    document.getElementById('dt-save').onclick=saveDetail;
+    document.getElementById('dt-del').onclick=deleteDetail;
+    document.getElementById('detail-screen').style.display='flex';
+  }
+  function closeDetail(){ document.getElementById('detail-screen').style.display='none'; }
+  function saveDetail(){
+    if(!dtCurrentId||!currentUser) return;
+    var c=+document.getElementById('dt-cur').value||0, t=+document.getElementById('dt-total').value||0;
+    var upd={ status:dtStatus, currentPage:c, totalPages:t, rating:dtRating, review:document.getElementById('dt-review').value||'', memos:dtMemos, startDate:document.getElementById('dt-start').value||'', endDate:document.getElementById('dt-end').value||'', updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
+    if(dtStatus==='done'){ upd.doneAt = dtDoneAt || firebase.firestore.FieldValue.serverTimestamp(); }
+    fbDB.collection('users').doc(currentUser.uid).collection('books').doc(dtCurrentId).update(upd).then(function(){ closeDetail(); loadBooks(); }).catch(function(e){ alert('저장 실패: '+e.message); });
+  }
+  function deleteDetail(){
+    if(!dtCurrentId||!currentUser) return;
+    if(!confirm('이 책을 삭제할까요?')) return;
+    fbDB.collection('users').doc(currentUser.uid).collection('books').doc(dtCurrentId).delete().then(function(){ closeDetail(); loadBooks(); }).catch(function(e){ alert('삭제 실패: '+e.message); });
+  }
+  document.getElementById('dt-back').onclick=closeDetail;
+  if(typeof fbAuth!=='undefined' && fbAuth){
+    fbAuth.onAuthStateChanged(function(u){ currentUser=u||null; renderAccount(); if(mainInit){ myBooks=[]; loadBooks(); } });
+    fbAuth.getRedirectResult().catch(function(e){ if(e && e.message) alert('로그인 실패: '+e.message); });
+  }
+  renderAccount();
+
+  /* ---------- tabs ---------- */
+  var tabs=document.querySelectorAll('.tab');
+  tabs.forEach(function(t){
+    t.onclick=function(){
+      tabs.forEach(function(x){x.classList.remove('on');});
+      t.classList.add('on');
+      document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+      document.getElementById('view-'+t.getAttribute('data-view')).classList.add('active');
+      document.querySelector('.content').scrollTop=0;
+    };
+  });
+})();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function(){}); });
+  }
+</script>
+</body>
+</html>
