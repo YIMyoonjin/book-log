@@ -297,7 +297,7 @@
     var bd=type==='c'?'border:1.5px solid #161616;':'';
     return '<div class="cover" style="height:'+h+'px; background:'+bg+'; color:'+col+'; '+bd+' font-size:'+fs+'px;">'+title+'</div>';
   }
-  var oCov={hp:'https://covers.openlibrary.org/b/isbn/9780590353427-M.jpg',sapiens:'https://covers.openlibrary.org/b/isbn/9780062316097-M.jpg',habit:'https://covers.openlibrary.org/b/isbn/9780735211292-M.jpg',prince:'https://covers.openlibrary.org/b/isbn/9780156012195-M.jpg',alchemist:'https://covers.openlibrary.org/b/isbn/9780061122415-M.jpg',demian:'https://covers.openlibrary.org/b/isbn/9780486469010-M.jpg'};
+  var oCov={hp:'https://covers.openlibrary.org/b/isbn/9780590353427-M.jpg',sapiens:'https://covers.openlibrary.org/b/isbn/9780062316097-M.jpg',habit:'https://covers.openlibrary.org/b/isbn/9780735211292-M.jpg',prince:'https://covers.openlibrary.org/b/isbn/9780156012195-M.jpg',alchemist:'https://covers.openlibrary.org/b/isbn/9780061122415-M.jpg',demian:'https://covers.openlibrary.org/b/isbn/9780553213485-M.jpg'};
   function ocov(url,w,h,bg){ return '<div style="width:'+w+'; height:'+h+'px; border-radius:6px; overflow:hidden; background:'+(bg||'#8C8577')+'; flex-shrink:0;"><img src="'+url+'?default=false" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display=\'none\'"></div>'; }
   function buildObReading(){
     var el=document.getElementById('ob-reading'); if(!el) return;
@@ -458,32 +458,35 @@
     var translators=raw.translators||[];
     var dt=raw.datetime?new Date(raw.datetime):null;
     var yy=dt&&!isNaN(dt)?dt.getFullYear():'', mm=dt&&!isNaN(dt)?(dt.getMonth()+1):'', dd=dt&&!isNaN(dt)?dt.getDate():'';
+    var isbn=isbn13(raw.isbn);
+    var lang=/[가-힣]/.test(title)?'한국어':'영어';
     var body=document.getElementById('reg-body');
     body.innerHTML=''
       +'<div style="display:flex; justify-content:center; padding:8px 0 4px;">'+(cover?'<img src="'+cover+'" style="width:96px; height:138px; object-fit:cover; border-radius:8px;">':'<div style="width:96px; height:138px; border-radius:8px; background:#161616;"></div>')+'</div>'
-      +'<div class="reg-sec">기본 정보</div><div class="reg-card"><div class="reg-lab">책 제목</div><input class="reg-in" id="reg-title" value="'+esc(title)+'"><div class="reg-lab">ISBN</div><input class="reg-in" id="reg-isbn" value="'+esc(isbn13(raw.isbn))+'"><div class="reg-lab">전체 페이지 수</div><input class="reg-in" id="reg-pages" type="number" inputmode="numeric" placeholder="예: 260"><div class="reg-lab">언어</div><input class="reg-in" id="reg-lang" value="한국어"></div>'
-      +'<div class="reg-sec">크리에이터 정보</div><div class="reg-card"><div style="display:flex; align-items:center;"><span class="reg-lab" style="margin:0;">저자</span><button class="reg-cbtn" id="reg-authors-add" style="background:#378ADD; margin-left:auto;">＋</button></div><div id="reg-authors"></div><div style="display:flex; align-items:center; margin-top:14px;"><span class="reg-lab" style="margin:0;">역자</span><button class="reg-cbtn" id="reg-translators-add" style="background:#378ADD; margin-left:auto;">＋</button></div><div id="reg-translators"></div></div>'
+      +'<div class="reg-sec">기본 정보</div><div class="reg-card"><div class="reg-lab">책 제목</div><input class="reg-in" id="reg-title" value="'+esc(title)+'"><div class="reg-lab">ISBN</div><input class="reg-in" id="reg-isbn" value="'+esc(isbn)+'"><div class="reg-lab">전체 페이지 수</div><input class="reg-in" id="reg-pages" type="number" inputmode="numeric" placeholder="불러오는 중…"><div class="reg-lab">언어</div><input class="reg-in" id="reg-lang" value="'+lang+'"></div>'
+      +'<div class="reg-sec">크리에이터 정보</div><div class="reg-card"><div class="reg-lab">저자</div><input class="reg-in" id="reg-author" value="'+esc(authors.join(', '))+'"><div class="reg-lab">역자</div><input class="reg-in" id="reg-translator" value="'+esc(translators.join(', '))+'"></div>'
       +'<div class="reg-sec">출판 정보</div><div class="reg-card"><div class="reg-lab">출판사</div><input class="reg-in" id="reg-pub" value="'+esc(raw.publisher||vi.publisher||'')+'"><div class="reg-lab">출판일</div><div style="display:flex; gap:8px;"><input class="reg-in" id="reg-yy" type="number" inputmode="numeric" placeholder="년" value="'+yy+'" style="flex:1;"><input class="reg-in" id="reg-mm" type="number" inputmode="numeric" placeholder="월" value="'+mm+'" style="flex:1;"><input class="reg-in" id="reg-dd" type="number" inputmode="numeric" placeholder="일" value="'+dd+'" style="flex:1;"></div></div>'
       +'<div class="reg-sec">타입 정보</div><div class="reg-card"><div class="reg-lab">어떤 방식의 책을 읽으시나요?</div><select class="reg-in" id="reg-format"><option>종이책</option><option>전자책</option><option>오디오북</option></select><div class="reg-lab">진행도를 어떻게 기록하시겠어요?</div><select class="reg-in" id="reg-progress"><option>페이지</option><option>퍼센트</option></select></div>'
-      +'<div class="reg-sec">책 소개</div><textarea class="dt-area" id="reg-intro" style="min-height:100px;">'+esc(raw.contents||'')+'</textarea>'
       +'<button class="addbtn" id="reg-confirm" style="margin-top:24px;">확인</button>';
-    var aw=document.getElementById('reg-authors'); (authors.length?authors:['']).forEach(function(a){ addCreatorRow(aw, a); });
-    var tw=document.getElementById('reg-translators'); (translators.length?translators:['']).forEach(function(t){ addCreatorRow(tw, t); });
-    document.getElementById('reg-authors-add').onclick=function(){ addCreatorRow(aw,''); };
-    document.getElementById('reg-translators-add').onclick=function(){ addCreatorRow(tw,''); };
     document.getElementById('reg-confirm').onclick=saveRegister;
     document.getElementById('register-screen').style.display='flex';
+    if(isbn){
+      fetch('https://www.googleapis.com/books/v1/volumes?q=isbn:'+isbn+'&key=AIzaSyCylNRvJZFWZIei_yvmhX8_J38sFuL-Pk8')
+        .then(function(r){return r.json();})
+        .then(function(d){ var pc=(((d.items||[])[0]||{}).volumeInfo||{}).pageCount; var el=document.getElementById('reg-pages'); if(el){ if(pc){ el.value=pc; } else { el.placeholder='직접 입력'; } } })
+        .catch(function(){ var el=document.getElementById('reg-pages'); if(el) el.placeholder='직접 입력'; });
+    } else { var el=document.getElementById('reg-pages'); if(el) el.placeholder='직접 입력'; }
   }
   function closeRegister(){ document.getElementById('register-screen').style.display='none'; }
   function saveRegister(){
     if(!currentUser){ alert('로그인이 필요해요. 설정 탭에서 로그인해 주세요.'); return; }
     var title=document.getElementById('reg-title').value.trim(); if(!title){ alert('책 제목을 입력해 주세요.'); return; }
-    function vals(id){ return [].slice.call(document.getElementById(id).querySelectorAll('.cin')).map(function(i){return i.value.trim();}).filter(Boolean); }
-    var authors=vals('reg-authors'), translators=vals('reg-translators');
+    function splitc(id){ return document.getElementById(id).value.split(',').map(function(s){return s.trim();}).filter(Boolean); }
+    var authors=splitc('reg-author'), translators=splitc('reg-translator');
     var yy=document.getElementById('reg-yy').value, mm=document.getElementById('reg-mm').value, dd=document.getElementById('reg-dd').value;
     function z(n){ return ('0'+n).slice(-2); }
     var pubDate = yy? (yy+(mm?('.'+z(mm)):'')+(mm&&dd?('.'+z(dd)):'')) : '';
-    var book={ title:title, author:authors.join(', '), authors:authors, translators:translators, cover:regCover||'', isbn:document.getElementById('reg-isbn').value.trim(), totalPages:+document.getElementById('reg-pages').value||0, currentPage:0, language:document.getElementById('reg-lang').value.trim(), publisher:document.getElementById('reg-pub').value.trim(), publishDate:pubDate, format:document.getElementById('reg-format').value, progressType:document.getElementById('reg-progress').value, intro:document.getElementById('reg-intro').value, memos:[], status:'reading', createdAt:firebase.firestore.FieldValue.serverTimestamp(), updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
+    var book={ title:title, author:authors.join(', '), authors:authors, translators:translators, cover:regCover||'', isbn:document.getElementById('reg-isbn').value.trim(), totalPages:+document.getElementById('reg-pages').value||0, currentPage:0, language:document.getElementById('reg-lang').value.trim(), publisher:document.getElementById('reg-pub').value.trim(), publishDate:pubDate, format:document.getElementById('reg-format').value, progressType:document.getElementById('reg-progress').value, memos:[], status:'reading', createdAt:firebase.firestore.FieldValue.serverTimestamp(), updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
     fbDB.collection('users').doc(currentUser.uid).collection('books').add(book).then(function(){ closeRegister(); closeSearch(); document.getElementById('srch-input').value=''; document.getElementById('srch-results').innerHTML=''; loadBooks(); }).catch(function(e){ alert('저장 실패: '+e.message); });
   }
   document.getElementById('reg-back').onclick=closeRegister;
@@ -629,7 +632,7 @@
       +'<div class="dt-lab">상태</div><div class="seg" id="dt-seg"><button data-s="want">읽고 싶은</button><button data-s="reading">읽는 중</button><button data-s="done">완독</button></div>'
       +'<div class="dt-lab">진행률</div><div style="display:flex; gap:10px; align-items:center;"><input class="dt-input" id="dt-cur" type="number" inputmode="numeric" placeholder="현재 쪽" value="'+(b.currentPage||'')+'" style="flex:1;"><span style="font-weight:800;">/</span><input class="dt-input" id="dt-total" type="number" inputmode="numeric" placeholder="전체 쪽" value="'+(b.totalPages||'')+'" style="flex:1;"><span id="dt-pct" style="font-weight:800; min-width:42px; text-align:right;">'+pctOf(b)+'%</span></div>'
       +'<div class="dt-lab">별점</div><div id="dt-stars">'+[1,2,3,4,5].map(function(n){return '<span class="star" data-n="'+n+'">★</span>';}).join('')+'</div>'
-      +'<div class="pen" style="font-size:24px; color:var(--ink); transform:rotate(-3deg); margin:22px 0 6px;">Review</div><textarea class="dt-area" id="dt-review" placeholder="이 책에서 느낀 점을 기록해보세요">'+esc(b.review||'')+'</textarea>'
+      +'<div class="pen" style="font-size:24px; color:var(--ink); transform:rotate(-3deg); margin:22px 0 6px;">Review</div><textarea class="dt-area" id="dt-review" style="min-height:220px;" placeholder="이 책에서 느낀 점을 기록해보세요">'+esc(b.review||'')+'</textarea>'
       +'<div class="dt-lab">메모 <span id="memo-count">('+dtMemos.length+')</span></div><div id="memo-list"></div><div id="memo-add-row" style="display:flex; gap:8px; margin-top:8px;"><input class="dt-input" id="memo-input" placeholder="메모 입력 (최대 5개)" style="flex:1;"><button id="memo-add" class="blk" style="border:none; width:46px; height:46px; padding:0; cursor:pointer; font-size:22px; flex-shrink:0;">＋</button></div><div id="memo-full" style="display:none; font-size:12px; color:#6E675B; padding:8px 0;">메모는 최대 5개까지 추가할 수 있어요.</div>'
       +'<button class="addbtn" id="dt-save" style="margin-top:22px;">저장하기</button>'
       +'<button id="dt-del" style="width:100%; height:46px; margin-top:10px; border:1.5px solid #161616; border-radius:12px; background:transparent; color:#161616; font-weight:800; font-family:inherit; cursor:pointer;">삭제</button>';
