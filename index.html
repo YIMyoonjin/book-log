@@ -41,10 +41,10 @@
 
   /* MAIN */
   #main{display:none; flex:1; min-height:0; flex-direction:column;}
-  .content{flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:26px 24px 24px;}
+  .content{flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:26px 24px calc(44px + env(safe-area-inset-bottom));}
   .view{display:none;}
   .view.active{display:block;}
-  .tabbar{flex-shrink:0; height:66px; display:flex; border-top:1.5px solid var(--line); background:rgba(216,212,200,.92);}
+  .tabbar{flex-shrink:0; min-height:66px; display:flex; border-top:1.5px solid var(--line); background:rgba(216,212,200,.92); padding-bottom:env(safe-area-inset-bottom);}
   .tab{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:var(--mut); cursor:pointer; background:none; border:none; font-family:inherit;}
   .tab svg{width:23px; height:23px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
   .tab span{font-size:10px; font-weight:700;}
@@ -163,7 +163,7 @@
         <div style="display:flex; align-items:baseline; gap:8px; margin-top:24px;"><span class="lab">읽는 중</span><span class="blk" id="shelf-reading-count">0권</span></div>
         <div class="rule" style="margin-top:9px;"></div>
         <div id="shelf-reading" style="margin-top:4px;"></div>
-        <div style="display:flex; align-items:baseline; gap:8px; margin-top:26px;"><span class="lab">완독</span><span class="blk" id="shelf-count">0권</span></div>
+        <div style="display:flex; align-items:baseline; gap:8px; margin-top:44px;"><span class="lab">완독</span><span class="blk" id="shelf-count">0권</span></div>
         <div class="rule" style="margin-top:9px;"></div>
         <div id="shelf-grid" style="margin-top:4px;"></div>
       </section>
