@@ -34,7 +34,7 @@
   .page{width:25%; height:100%; padding:34px 27px 0; overflow:hidden; display:flex; flex-direction:column;}
   .big{font-size:72px; line-height:.82; color:var(--ora);}
   .penh{font-size:31px; color:var(--ink); margin-top:2px; transform:rotate(-3deg);}
-  .obbar{position:absolute; bottom:0; left:0; right:0; padding:16px 27px 26px; background:linear-gradient(transparent,var(--bg) 38%);}
+  .obbar{position:absolute; bottom:0; left:0; right:0; padding:16px 27px calc(42px + env(safe-area-inset-bottom)); background:linear-gradient(transparent,var(--bg) 38%);}
   .btn{width:100%; height:50px; border:none; border-radius:25px; background:var(--ora); color:#161616; font-size:15px; font-weight:800; cursor:pointer; font-family:inherit;}
   #dots{position:absolute; top:26px; right:27px; display:flex; gap:5px; z-index:5;}
   #dots span{height:7px; border-radius:4px; display:inline-block; transition:all .3s;}
@@ -160,8 +160,12 @@
       <section class="view" id="view-shelf">
         <div class="disp" style="font-size:46px; color:var(--ora); line-height:.9;">서재</div>
         <div class="pen" style="font-size:24px; transform:rotate(-3deg); margin-top:2px;">my library</div>
-        <div style="display:flex; align-items:baseline; gap:8px; margin-top:26px;"><span class="sub">읽은 책</span><span class="blk" id="shelf-count">0권</span></div>
-        <div id="shelf-grid" style="margin-top:20px;"></div>
+        <div style="display:flex; align-items:baseline; gap:8px; margin-top:24px;"><span class="lab">읽는 중</span><span class="blk" id="shelf-reading-count">0권</span></div>
+        <div class="rule" style="margin-top:9px;"></div>
+        <div id="shelf-reading" style="margin-top:4px;"></div>
+        <div style="display:flex; align-items:baseline; gap:8px; margin-top:26px;"><span class="lab">완독</span><span class="blk" id="shelf-count">0권</span></div>
+        <div class="rule" style="margin-top:9px;"></div>
+        <div id="shelf-grid" style="margin-top:4px;"></div>
       </section>
 
       <!-- CALENDAR -->
@@ -170,6 +174,8 @@
         <div class="pen" style="font-size:24px; transform:rotate(-3deg); margin-top:2px;">reading calendar</div>
         <div style="display:flex; align-items:center; gap:14px; margin-top:26px;">
           <span class="lab" id="cal-month" style="font-size:16px;">달력</span>
+          <span id="cal-prev" style="margin-left:auto; color:var(--ink); font-weight:800; cursor:pointer; font-size:22px; padding:2px 8px;">‹</span>
+          <span id="cal-next" style="color:var(--ink); font-weight:800; cursor:pointer; font-size:22px; padding:2px 8px;">›</span>
         </div>
         <div class="rule" style="margin-top:12px;"></div>
         <div id="cal-grid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:14px;"></div>
@@ -333,6 +339,9 @@
       sl.innerHTML+='<div class="rule" style="display:flex; align-items:center; padding:15px 2px;"><span style="font-size:14px; font-weight:600;">'+t+'</span><span style="margin-left:auto; color:#6E675B;">›</span></div>';
     });
     document.getElementById('home-add').onclick=openSearch;
+    var cp=document.getElementById('cal-prev'), cn=document.getElementById('cal-next');
+    if(cp) cp.onclick=function(){ calM--; if(calM<0){ calM=11; calY--; } renderCalendar(); };
+    if(cn) cn.onclick=function(){ calM++; if(calM>11){ calM=0; calY++; } renderCalendar(); };
     if(currentUser){ loadBooks(); } else { renderAll(); }
   }
 
@@ -470,15 +479,17 @@
     setText('stat-month',monthDone); setText('stat-year',yearDone); setText('stat-all',done.length);
     bindBookItems();
   }
+  function gridHtml(books){ var html='';
+    for(var i=0;i<books.length;i+=3){ html+='<div class="rule" style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:16px 0;">'+books.slice(i,i+3).map(function(b){ return '<div class="book-item" data-id="'+b.id+'" style="cursor:pointer;">'+(b.cover?'<img src="'+b.cover+'" style="width:100%; height:94px; object-fit:cover; border-radius:8px;">':'<div style="height:94px; border-radius:8px; background:#161616;"></div>')+'<div style="font-size:11px; font-weight:700; margin-top:7px; text-align:center; line-height:1.3;">'+esc(b.title)+'</div><div style="font-size:9px; color:#6E675B; text-align:center; margin-top:3px; line-height:1.3;">'+esc(b.author)+'</div></div>'; }).join('')+'</div>'; }
+    return html;
+  }
   function renderShelf(){
-    var sg=document.getElementById('shelf-grid'); if(!sg) return;
+    var sr=document.getElementById('shelf-reading'), sg=document.getElementById('shelf-grid');
+    var reading=myBooks.filter(function(b){return (b.status||'reading')==='reading';});
     var done=myBooks.filter(function(b){return b.status==='done';});
-    setText('shelf-count', done.length+'권');
-    sg.style.display='block';
-    if(!done.length){ sg.innerHTML='<div style="padding:16px 0; color:#6E675B; font-size:13px;">아직 읽은 책이 없어요. 책을 완독하면 여기에 표시돼요.</div>'; return; }
-    var html='';
-    for(var i=0;i<done.length;i+=3){ html+='<div class="rule" style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:16px 0;">'+done.slice(i,i+3).map(function(b){ return '<div class="book-item" data-id="'+b.id+'" style="cursor:pointer;">'+(b.cover?'<img src="'+b.cover+'" style="width:100%; height:94px; object-fit:cover; border-radius:8px;">':'<div style="height:94px; border-radius:8px; background:#161616;"></div>')+'<div style="font-size:11px; font-weight:700; margin-top:7px; text-align:center; line-height:1.3;">'+esc(b.title)+'</div><div style="font-size:9px; color:#6E675B; text-align:center; margin-top:3px; line-height:1.3;">'+esc(b.author)+'</div></div>'; }).join('')+'</div>'; }
-    sg.innerHTML=html;
+    setText('shelf-reading-count', reading.length+'권'); setText('shelf-count', done.length+'권');
+    if(sr) sr.innerHTML = reading.length? gridHtml(reading) : '<div style="padding:14px 0; color:#6E675B; font-size:13px;">읽는 중인 책이 없어요.</div>';
+    if(sg) sg.innerHTML = done.length? gridHtml(done) : '<div style="padding:14px 0; color:#6E675B; font-size:13px;">아직 완독한 책이 없어요.</div>';
     bindBookItems();
   }
   function fmtMD(d){ return d?((d.getMonth()+1)+'/'+d.getDate()):'—'; }
@@ -493,9 +504,10 @@
     }).join('');
     bindBookItems();
   }
+  var calY=new Date().getFullYear(), calM=new Date().getMonth();
   function renderCalendar(){
     var grid=document.getElementById('cal-grid'); if(!grid) return;
-    var now=new Date(), y=now.getFullYear(), m=now.getMonth();
+    var y=calY, m=calM;
     setText('cal-month', y+'년 '+(m+1)+'월');
     var map={};
     myBooks.filter(function(b){return b.status==='done';}).forEach(function(b){ var d=doneDate(b); if(d&&d.getFullYear()===y&&d.getMonth()===m) map[d.getDate()]=b; });
