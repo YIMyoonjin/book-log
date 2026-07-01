@@ -65,6 +65,14 @@
   .srch-item img{width:52px; height:74px; object-fit:cover; border-radius:5px; background:#161616; flex-shrink:0;}
   #detail-screen{position:absolute; inset:0; z-index:210; display:none; flex-direction:column; background:var(--bg);}
   #dt-body{flex:1; min-height:0; overflow-y:auto; padding:6px 22px 28px; -webkit-overflow-scrolling:touch;}
+  #register-screen{position:absolute; inset:0; z-index:220; display:none; flex-direction:column; background:var(--bg);}
+  #reg-body{flex:1; min-height:0; overflow-y:auto; padding:6px 22px calc(30px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling:touch;}
+  .reg-sec{font-size:12px; font-weight:800; color:var(--mut); margin:22px 0 8px; letter-spacing:.02em;}
+  .reg-lab{font-size:11px; color:var(--mut); margin:12px 0 4px;}
+  .reg-in{width:100%; height:44px; border:none; border-radius:10px; padding:0 12px; font-size:15px; font-family:inherit; background:rgba(255,255,255,.5); outline:none; box-sizing:border-box;}
+  .reg-card{background:rgba(255,255,255,.34); border:1.5px solid var(--line); border-radius:14px; padding:14px 16px;}
+  .reg-cbtn{width:30px; height:30px; border-radius:50%; border:none; color:#fff; font-size:18px; font-weight:800; cursor:pointer; flex-shrink:0; line-height:1;}
+  button{touch-action:manipulation;}
   .seg{display:flex; gap:8px; margin-top:8px;}
   .seg button{flex:1; height:42px; border:1.5px solid var(--ink); border-radius:10px; background:transparent; color:var(--ink); font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;}
   .seg button.on{background:var(--ora); border-color:var(--ora);}
@@ -254,6 +262,18 @@
     <div id="dt-body"></div>
   </div>
 
+  <!-- BOOK REGISTER OVERLAY -->
+  <div id="register-screen">
+    <div class="srch-head">
+      <button class="srch-back" id="reg-back">&larr;</button>
+      <div>
+        <div class="disp" style="font-size:30px; color:var(--ora); line-height:.9;">책 등록하기</div>
+        <div class="pen" style="font-size:18px; transform:rotate(-3deg); margin-top:2px;">add a book</div>
+      </div>
+    </div>
+    <div id="reg-body"></div>
+  </div>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -359,7 +379,7 @@
     fetch(prox)
       .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
       .then(function(d){
-        var items=(d.documents||[]).map(function(x){ return { id:(x.isbn||x.title), volumeInfo:{ title:x.title, authors:x.authors, publisher:x.publisher, imageLinks: x.thumbnail?{thumbnail:x.thumbnail}:undefined } }; });
+        var items=(d.documents||[]).map(function(x){ return { id:(x.isbn||x.title), raw:x, volumeInfo:{ title:x.title, authors:x.authors, publisher:x.publisher, imageLinks: x.thumbnail?{thumbnail:x.thumbnail}:undefined } }; });
         renderResults(items, q);
       })
       .catch(function(e){ box.innerHTML='<div style="padding:20px 0; color:#6E675B; font-size:13px; line-height:1.6;">검색 오류: '+(e&&e.message?e.message:e)+'<br>· 인터넷 연결 확인<br>· 그래도 안 되면 “직접 등록하기” 사용</div>'; });
@@ -401,11 +421,12 @@
       html+='<div class="srch-item">'+cover+'<div style="flex:1;"><div style="font-size:14px; font-weight:800; line-height:1.35;">'+(v.title||'제목 미상')+'</div><div style="font-size:11px; color:#6E675B; margin-top:4px;">'+au+(pub?' · '+pub:'')+'</div></div><button class="blk addone" data-i="'+i+'" style="border:none; cursor:pointer; align-self:center;">추가</button></div>';
     });
     box.innerHTML=html; bindAdd();
+    try{ document.getElementById('srch-input').blur(); }catch(e){}
   }
   function bindAdd(){
-    var m=document.querySelector('.manual'); if(m) m.onclick=function(){ var t=prompt('책 제목을 입력하세요'); if(t){ var a=prompt('저자 (선택)')||''; addBook(t,a,''); } };
+    var m=document.querySelector('.manual'); if(m) m.onclick=function(){ openRegister({raw:{}, volumeInfo:{}}); };
     document.querySelectorAll('.addone').forEach(function(b){
-      b.onclick=function(){ var it=window._lastResults[+b.getAttribute('data-i')]; var v=it.volumeInfo||{}; addBook(v.title||'제목 미상',(v.authors||[]).join(', ')||'',((v.imageLinks||{}).thumbnail||'').replace('http://','https://')); };
+      b.onclick=function(){ openRegister(window._lastResults[+b.getAttribute('data-i')]); };
     });
   }
   function addBook(title,author,img){
@@ -419,6 +440,53 @@
     closeSearch();
     document.getElementById('srch-input').value=''; document.getElementById('srch-results').innerHTML='';
   }
+  /* ---------- 책 등록하기 ---------- */
+  var regCover='';
+  function isbn13(s){ if(!s) return ''; var parts=(''+s).split(/\s+/); for(var i=0;i<parts.length;i++){ if(parts[i].length===13) return parts[i]; } return parts[parts.length-1]||''; }
+  function addCreatorRow(wrap, val){
+    var row=document.createElement('div'); row.style.cssText='display:flex; gap:8px; align-items:center; margin-top:8px;';
+    var inp=document.createElement('input'); inp.className='reg-in cin'; inp.style.flex='1'; inp.value=val||'';
+    var del=document.createElement('button'); del.className='reg-cbtn'; del.style.background='#8A8577'; del.textContent='−';
+    del.onclick=function(){ row.remove(); if(!wrap.children.length) addCreatorRow(wrap,''); };
+    row.appendChild(inp); row.appendChild(del); wrap.appendChild(row);
+  }
+  function openRegister(item){
+    var raw=(item&&item.raw)||{}, vi=(item&&item.volumeInfo)||{};
+    var title=raw.title||vi.title||'';
+    var cover=(raw.thumbnail||((vi.imageLinks||{}).thumbnail)||'').replace('http://','https://'); regCover=cover;
+    var authors=(raw.authors&&raw.authors.length?raw.authors:(vi.authors||[]));
+    var translators=raw.translators||[];
+    var dt=raw.datetime?new Date(raw.datetime):null;
+    var yy=dt&&!isNaN(dt)?dt.getFullYear():'', mm=dt&&!isNaN(dt)?(dt.getMonth()+1):'', dd=dt&&!isNaN(dt)?dt.getDate():'';
+    var body=document.getElementById('reg-body');
+    body.innerHTML=''
+      +'<div style="display:flex; justify-content:center; padding:8px 0 4px;">'+(cover?'<img src="'+cover+'" style="width:96px; height:138px; object-fit:cover; border-radius:8px;">':'<div style="width:96px; height:138px; border-radius:8px; background:#161616;"></div>')+'</div>'
+      +'<div class="reg-sec">기본 정보</div><div class="reg-card"><div class="reg-lab">책 제목</div><input class="reg-in" id="reg-title" value="'+esc(title)+'"><div class="reg-lab">ISBN</div><input class="reg-in" id="reg-isbn" value="'+esc(isbn13(raw.isbn))+'"><div class="reg-lab">전체 페이지 수</div><input class="reg-in" id="reg-pages" type="number" inputmode="numeric" placeholder="예: 260"><div class="reg-lab">언어</div><input class="reg-in" id="reg-lang" value="한국어"></div>'
+      +'<div class="reg-sec">크리에이터 정보</div><div class="reg-card"><div style="display:flex; align-items:center;"><span class="reg-lab" style="margin:0;">저자</span><button class="reg-cbtn" id="reg-authors-add" style="background:#378ADD; margin-left:auto;">＋</button></div><div id="reg-authors"></div><div style="display:flex; align-items:center; margin-top:14px;"><span class="reg-lab" style="margin:0;">역자</span><button class="reg-cbtn" id="reg-translators-add" style="background:#378ADD; margin-left:auto;">＋</button></div><div id="reg-translators"></div></div>'
+      +'<div class="reg-sec">출판 정보</div><div class="reg-card"><div class="reg-lab">출판사</div><input class="reg-in" id="reg-pub" value="'+esc(raw.publisher||vi.publisher||'')+'"><div class="reg-lab">출판일</div><div style="display:flex; gap:8px;"><input class="reg-in" id="reg-yy" type="number" inputmode="numeric" placeholder="년" value="'+yy+'" style="flex:1;"><input class="reg-in" id="reg-mm" type="number" inputmode="numeric" placeholder="월" value="'+mm+'" style="flex:1;"><input class="reg-in" id="reg-dd" type="number" inputmode="numeric" placeholder="일" value="'+dd+'" style="flex:1;"></div></div>'
+      +'<div class="reg-sec">타입 정보</div><div class="reg-card"><div class="reg-lab">어떤 방식의 책을 읽으시나요?</div><select class="reg-in" id="reg-format"><option>종이책</option><option>전자책</option><option>오디오북</option></select><div class="reg-lab">진행도를 어떻게 기록하시겠어요?</div><select class="reg-in" id="reg-progress"><option>페이지</option><option>퍼센트</option></select></div>'
+      +'<div class="reg-sec">책 소개</div><textarea class="dt-area" id="reg-intro" style="min-height:100px;">'+esc(raw.contents||'')+'</textarea>'
+      +'<button class="addbtn" id="reg-confirm" style="margin-top:24px;">확인</button>';
+    var aw=document.getElementById('reg-authors'); (authors.length?authors:['']).forEach(function(a){ addCreatorRow(aw, a); });
+    var tw=document.getElementById('reg-translators'); (translators.length?translators:['']).forEach(function(t){ addCreatorRow(tw, t); });
+    document.getElementById('reg-authors-add').onclick=function(){ addCreatorRow(aw,''); };
+    document.getElementById('reg-translators-add').onclick=function(){ addCreatorRow(tw,''); };
+    document.getElementById('reg-confirm').onclick=saveRegister;
+    document.getElementById('register-screen').style.display='flex';
+  }
+  function closeRegister(){ document.getElementById('register-screen').style.display='none'; }
+  function saveRegister(){
+    if(!currentUser){ alert('로그인이 필요해요. 설정 탭에서 로그인해 주세요.'); return; }
+    var title=document.getElementById('reg-title').value.trim(); if(!title){ alert('책 제목을 입력해 주세요.'); return; }
+    function vals(id){ return [].slice.call(document.getElementById(id).querySelectorAll('.cin')).map(function(i){return i.value.trim();}).filter(Boolean); }
+    var authors=vals('reg-authors'), translators=vals('reg-translators');
+    var yy=document.getElementById('reg-yy').value, mm=document.getElementById('reg-mm').value, dd=document.getElementById('reg-dd').value;
+    function z(n){ return ('0'+n).slice(-2); }
+    var pubDate = yy? (yy+(mm?('.'+z(mm)):'')+(mm&&dd?('.'+z(dd)):'')) : '';
+    var book={ title:title, author:authors.join(', '), authors:authors, translators:translators, cover:regCover||'', isbn:document.getElementById('reg-isbn').value.trim(), totalPages:+document.getElementById('reg-pages').value||0, currentPage:0, language:document.getElementById('reg-lang').value.trim(), publisher:document.getElementById('reg-pub').value.trim(), publishDate:pubDate, format:document.getElementById('reg-format').value, progressType:document.getElementById('reg-progress').value, intro:document.getElementById('reg-intro').value, memos:[], status:'reading', createdAt:firebase.firestore.FieldValue.serverTimestamp(), updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
+    fbDB.collection('users').doc(currentUser.uid).collection('books').add(book).then(function(){ closeRegister(); closeSearch(); document.getElementById('srch-input').value=''; document.getElementById('srch-results').innerHTML=''; loadBooks(); }).catch(function(e){ alert('저장 실패: '+e.message); });
+  }
+  document.getElementById('reg-back').onclick=closeRegister;
   document.getElementById('srch-go').onclick=doSearch;
   document.getElementById('srch-input').addEventListener('keydown',function(e){ if(e.key==='Enter') doSearch(); });
 
