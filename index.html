@@ -441,7 +441,7 @@
   function bookRow(b){ return '<div class="rule book-item" data-id="'+b.id+'" style="display:flex; align-items:center; gap:14px; padding:13px 0; cursor:pointer;">'+miniCover(b,38,54)+'<div style="flex:1;"><div style="font-size:14px; font-weight:800;">'+esc(b.title)+'</div><div style="font-size:11px; color:#6E675B; margin-top:2px;">'+esc(b.author)+'</div></div><span class="blk">'+pctOf(b)+'%</span></div>'; }
   function bindBookItems(){ document.querySelectorAll('.book-item').forEach(function(el){ el.onclick=function(){ openDetail(el.getAttribute('data-id')); }; }); }
   function startInfo(b){
-    var d=(b.createdAt&&b.createdAt.toDate)?b.createdAt.toDate():null;
+    var d=bStart(b);
     if(!d) return {s:'',days:0};
     function z(n){ return (n<10?'0':'')+n; }
     return { s:d.getFullYear()+'.'+z(d.getMonth()+1)+'.'+z(d.getDate()), days:Math.max(1, Math.floor((Date.now()-d.getTime())/86400000)+1) };
@@ -452,7 +452,12 @@
     return '<div class="book-item" data-id="'+b.id+'" style="cursor:pointer;"><div style="display:flex; gap:14px; padding:13px 0;">'+miniCover(b,64,92)+'<div style="flex:1; display:flex; flex-direction:column; gap:6px;"><div style="font-size:15px; font-weight:800; line-height:1.3;">'+esc(b.title)+'</div><div style="font-size:11px; color:var(--mut);">'+esc(b.author)+'</div>'+memoTag+'<div style="display:flex; align-items:center; gap:8px; margin-top:2px;"><span class="blk">'+(b.currentPage||0)+' / '+(b.totalPages||0)+'p</span><div style="flex:1; height:6px; background:#C2BBAB; border-radius:4px; overflow:hidden;"><div style="width:'+p+'%; height:100%; background:var(--ora); border-radius:4px;"></div></div><span style="font-size:12px; font-weight:800;">'+p+'%</span></div>'+(si.s?'<div style="display:flex; align-items:center; font-size:11px; color:var(--mut);"><span>시작 '+si.s+'</span><span class="blk" style="margin-left:auto;">'+si.days+'일째</span></div>':'')+'</div></div><div class="rule"></div></div>';
   }
   function setText(id,v){ var el=document.getElementById(id); if(el) el.textContent=v; }
-  function doneDate(b){ return (b.doneAt&&b.doneAt.toDate)?b.doneAt.toDate():null; }
+  function parseD(s){ if(!s) return null; var p=(''+s).split('-'); if(p.length!==3) return null; var d=new Date(+p[0],+p[1]-1,+p[2]); return isNaN(d.getTime())?null:d; }
+  function tsD(ts){ return (ts&&ts.toDate)?ts.toDate():null; }
+  function bStart(b){ return parseD(b.startDate) || tsD(b.createdAt); }
+  function bEnd(b){ return parseD(b.endDate) || tsD(b.doneAt); }
+  function tsToInput(d){ if(!d) return ''; function z(n){return (n<10?'0':'')+n;} return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
+  function doneDate(b){ return bEnd(b); }
   function renderHome(){
     var reading=myBooks.filter(function(b){return (b.status||'reading')==='reading';});
     var cur=document.getElementById('home-current');
@@ -476,14 +481,14 @@
     sg.innerHTML=html;
     bindBookItems();
   }
-  function fmtMD(ts){ var d=(ts&&ts.toDate)?ts.toDate():null; return d?((d.getMonth()+1)+'/'+d.getDate()):'—'; }
+  function fmtMD(d){ return d?((d.getMonth()+1)+'/'+d.getDate()):'—'; }
   function renderStats(){
     var el=document.getElementById('stats-records'); if(!el) return;
     var done=myBooks.filter(function(b){return b.status==='done';});
     if(!done.length){ el.innerHTML='<div style="padding:14px 0; color:#6E675B; font-size:13px;">완독한 책이 여기에 기록돼요.</div>'; return; }
     el.innerHTML=done.map(function(b){
-      var s=b.createdAt, e=b.doneAt, dur='';
-      if(s&&e&&s.toDate&&e.toDate){ dur=Math.max(1,Math.round((e.toDate()-s.toDate())/86400000))+'일'; }
+      var s=bStart(b), e=bEnd(b), dur='';
+      if(s&&e){ dur=Math.max(1,Math.round((e-s)/86400000))+'일'; }
       return '<div class="rule book-item" data-id="'+b.id+'" style="display:flex; align-items:center; gap:10px; padding:13px 0; cursor:pointer;"><span style="flex:1; font-size:14px; font-weight:800;">'+esc(b.title)+'</span><span style="font-size:11px; color:var(--mut);">'+fmtMD(s)+' ~ '+fmtMD(e)+'</span>'+(dur?'<span class="blk">'+dur+'</span>':'')+'</div>';
     }).join('');
     bindBookItems();
@@ -536,14 +541,16 @@
     var b=null; for(var i=0;i<myBooks.length;i++){ if(myBooks[i].id===id){ b=myBooks[i]; break; } }
     if(!b) return;
     dtCurrentId=id; dtStatus=b.status||'reading'; dtRating=b.rating||0; dtMemos=(b.memos||[]).slice(); dtDoneAt=b.doneAt||null;
+    var dtStart=b.startDate||tsToInput(tsD(b.createdAt)), dtEnd=b.endDate||tsToInput(tsD(b.doneAt));
     var body=document.getElementById('dt-body');
     body.innerHTML=''
       +'<div style="display:flex; gap:16px; align-items:center; padding:8px 0 4px;">'+miniCover(b,76,110)+'<div style="flex:1;"><div style="font-size:18px; font-weight:800; line-height:1.35;">'+esc(b.title)+'</div><div style="font-size:12px; color:var(--mut); margin-top:4px;">'+esc(b.author)+'</div></div></div>'
+      +'<div class="dt-lab">읽은 기간</div><div style="display:flex; gap:10px; align-items:center;"><input class="dt-input" id="dt-start" type="date" value="'+dtStart+'" style="flex:1;"><span style="font-weight:800;">~</span><input class="dt-input" id="dt-end" type="date" value="'+dtEnd+'" style="flex:1;"></div>'
       +'<div class="dt-lab">상태</div><div class="seg" id="dt-seg"><button data-s="want">읽고 싶은</button><button data-s="reading">읽는 중</button><button data-s="done">완독</button></div>'
       +'<div class="dt-lab">진행률</div><div style="display:flex; gap:10px; align-items:center;"><input class="dt-input" id="dt-cur" type="number" inputmode="numeric" placeholder="현재 쪽" value="'+(b.currentPage||'')+'" style="flex:1;"><span style="font-weight:800;">/</span><input class="dt-input" id="dt-total" type="number" inputmode="numeric" placeholder="전체 쪽" value="'+(b.totalPages||'')+'" style="flex:1;"><span id="dt-pct" style="font-weight:800; min-width:42px; text-align:right;">'+pctOf(b)+'%</span></div>'
       +'<div class="dt-lab">별점</div><div id="dt-stars">'+[1,2,3,4,5].map(function(n){return '<span class="star" data-n="'+n+'">★</span>';}).join('')+'</div>'
-      +'<div class="dt-lab">독후감 · 느낀 점</div><textarea class="dt-area" id="dt-review" placeholder="이 책에서 느낀 점을 기록해보세요">'+esc(b.review||'')+'</textarea>'
-      +'<div class="dt-lab">메모 <span id="memo-count">('+dtMemos.length+')</span></div><div id="memo-list"></div><div style="display:flex; gap:8px; margin-top:8px;"><input class="dt-input" id="memo-input" placeholder="메모를 입력하고 추가" style="flex:1;"><button id="memo-add" class="blk" style="border:none; height:46px; padding:0 16px; cursor:pointer; font-size:13px;">추가</button></div>'
+      +'<div class="pen" style="font-size:24px; color:var(--ink); transform:rotate(-3deg); margin:22px 0 6px;">Review</div><textarea class="dt-area" id="dt-review" placeholder="이 책에서 느낀 점을 기록해보세요">'+esc(b.review||'')+'</textarea>'
+      +'<div class="dt-lab">메모 <span id="memo-count">('+dtMemos.length+')</span></div><div id="memo-list"></div><div id="memo-add-row" style="display:flex; gap:8px; margin-top:8px;"><input class="dt-input" id="memo-input" placeholder="메모 입력 (최대 5개)" style="flex:1;"><button id="memo-add" class="blk" style="border:none; width:46px; height:46px; padding:0; cursor:pointer; font-size:22px; flex-shrink:0;">＋</button></div><div id="memo-full" style="display:none; font-size:12px; color:#6E675B; padding:8px 0;">메모는 최대 5개까지 추가할 수 있어요.</div>'
       +'<button class="addbtn" id="dt-save" style="margin-top:22px;">저장하기</button>'
       +'<button id="dt-del" style="width:100%; height:46px; margin-top:10px; border:1.5px solid #161616; border-radius:12px; background:transparent; color:#161616; font-weight:800; font-family:inherit; cursor:pointer;">삭제</button>';
     function paintSeg(){ document.querySelectorAll('#dt-seg button').forEach(function(x){ x.classList.toggle('on', x.getAttribute('data-s')===dtStatus); }); }
@@ -555,55 +562,4 @@
     document.getElementById('dt-cur').oninput=recalc; document.getElementById('dt-total').oninput=recalc;
     function renderMemos(){
       var list=document.getElementById('memo-list'); document.getElementById('memo-count').textContent='('+dtMemos.length+')';
-      if(!dtMemos.length){ list.innerHTML='<div style="font-size:12px; color:#6E675B; padding:8px 0;">아직 메모가 없어요.</div>'; return; }
-      list.innerHTML=dtMemos.map(function(m,i){ return '<div class="rule" style="display:flex; gap:10px; align-items:flex-start; padding:10px 0;"><div style="flex:1;"><div style="font-size:13px; line-height:1.5;">'+esc(m.text)+'</div><div style="font-size:10px; color:#6E675B; margin-top:3px;">'+esc(m.at||'')+'</div></div><span class="memo-del" data-i="'+i+'" style="cursor:pointer; color:#b42700; font-weight:800; font-size:18px; line-height:1;">×</span></div>'; }).join('');
-      document.querySelectorAll('.memo-del').forEach(function(x){ x.onclick=function(){ dtMemos.splice(+x.getAttribute('data-i'),1); renderMemos(); }; });
-    }
-    function addMemo(){ var inp=document.getElementById('memo-input'); var v=inp.value.trim(); if(!v) return; var d=new Date(); dtMemos.unshift({text:v, at:d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate()}); inp.value=''; renderMemos(); }
-    document.getElementById('memo-add').onclick=addMemo;
-    document.getElementById('memo-input').addEventListener('keydown',function(e){ if(e.key==='Enter') addMemo(); });
-    renderMemos();
-    document.getElementById('dt-save').onclick=saveDetail;
-    document.getElementById('dt-del').onclick=deleteDetail;
-    document.getElementById('detail-screen').style.display='flex';
-  }
-  function closeDetail(){ document.getElementById('detail-screen').style.display='none'; }
-  function saveDetail(){
-    if(!dtCurrentId||!currentUser) return;
-    var c=+document.getElementById('dt-cur').value||0, t=+document.getElementById('dt-total').value||0;
-    var upd={ status:dtStatus, currentPage:c, totalPages:t, rating:dtRating, review:document.getElementById('dt-review').value||'', memos:dtMemos, updatedAt:firebase.firestore.FieldValue.serverTimestamp() };
-    if(dtStatus==='done'){ upd.doneAt = dtDoneAt || firebase.firestore.FieldValue.serverTimestamp(); }
-    fbDB.collection('users').doc(currentUser.uid).collection('books').doc(dtCurrentId).update(upd).then(function(){ closeDetail(); loadBooks(); }).catch(function(e){ alert('저장 실패: '+e.message); });
-  }
-  function deleteDetail(){
-    if(!dtCurrentId||!currentUser) return;
-    if(!confirm('이 책을 삭제할까요?')) return;
-    fbDB.collection('users').doc(currentUser.uid).collection('books').doc(dtCurrentId).delete().then(function(){ closeDetail(); loadBooks(); }).catch(function(e){ alert('삭제 실패: '+e.message); });
-  }
-  document.getElementById('dt-back').onclick=closeDetail;
-  if(typeof fbAuth!=='undefined' && fbAuth){
-    fbAuth.onAuthStateChanged(function(u){ currentUser=u||null; renderAccount(); if(mainInit){ myBooks=[]; loadBooks(); } });
-    fbAuth.getRedirectResult().catch(function(e){ if(e && e.message) alert('로그인 실패: '+e.message); });
-  }
-  renderAccount();
-
-  /* ---------- tabs ---------- */
-  var tabs=document.querySelectorAll('.tab');
-  tabs.forEach(function(t){
-    t.onclick=function(){
-      tabs.forEach(function(x){x.classList.remove('on');});
-      t.classList.add('on');
-      document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
-      document.getElementById('view-'+t.getAttribute('data-view')).classList.add('active');
-      document.querySelector('.content').scrollTop=0;
-    };
-  });
-})();
-</script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function(){}); });
-  }
-</script>
-</body>
-</html>
+      if(!dtMemos.length){ list.innerHTML='<div style="font-size:12px; color:#6E675B; padding:8px 0;">아�
