@@ -77,6 +77,8 @@
   #guide-layer{position:absolute; inset:0;}
   .g-ring{position:absolute; border:2px solid #F46A2A; border-radius:12px; box-shadow:0 0 0 3px rgba(244,106,42,.2);}
   .g-lab{position:absolute; max-width:190px; background:var(--bg); border:1.5px solid #F46A2A; border-radius:12px; padding:9px 12px; font-size:13px; font-weight:700; line-height:1.45; color:var(--ink); box-shadow:0 2px 10px rgba(0,0,0,.35);}
+  .ob-ring{border:2px solid #F46A2A !important; border-radius:11px; box-shadow:0 0 0 3px rgba(244,106,42,.15);}
+  .ob-coach{margin-top:14px; background:rgba(255,255,255,.42); border:1.5px solid #F46A2A; border-radius:12px; padding:11px 13px; font-size:12.5px; font-weight:700; color:var(--ink); line-height:1.5; display:flex; gap:8px; align-items:flex-start;}
   .seg{display:flex; gap:8px; margin-top:8px;}
   .seg button{flex:1; height:42px; border:1.5px solid var(--ink); border-radius:10px; background:transparent; color:var(--ink); font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;}
   .seg button.on{background:var(--ora); border-color:var(--ora);}
@@ -345,6 +347,11 @@
   buildCal(document.getElementById('ob-cal'),false);
   buildBars(document.getElementById('ob-bars'));
   buildObRecords();
+  function coachAfter(id, text){ var c=document.getElementById(id); if(!c) return; c.classList.add('ob-ring'); var lab=document.createElement('div'); lab.className='ob-coach'; lab.innerHTML='<span style="color:#F46A2A; font-weight:800;">✦</span><span>'+text+'</span>'; c.parentNode.insertBefore(lab, c.nextSibling); }
+  coachAfter('ob-reading','표지·진행률·메모·별점·시작일을 한 곳에서 기록해요.');
+  coachAfter('ob-list','완독한 책이 표지로 서재에 차곡차곡 쌓여요.');
+  coachAfter('ob-cal','읽은 날에 그날 읽은 책 표지가 달력에 표시돼요.');
+  coachAfter('ob-records','월별 그래프와 완독 기록(며칠 걸렸는지)을 한눈에 봐요.');
   var idx=0,total=4;
   var track=document.getElementById('track'), obNext=document.getElementById('ob-next'), dotsEl=document.getElementById('dots');
   function dots(){dotsEl.innerHTML=''; for(var i=0;i<total;i++){var on=i===idx; dotsEl.innerHTML+='<span style="width:'+(on?18:7)+'px; background:'+(on?'#F46A2A':'#161616')+'; opacity:'+(on?1:.3)+';"></span>';}}
@@ -360,7 +367,6 @@
     document.getElementById('onboarding').style.display='none';
     document.getElementById('main').style.display='flex';
     initMain();
-    setTimeout(function(){ try{ startGuide(); }catch(e){} }, 500);
   }
   /* ---------- 스크린 오버레이 가이드 (한꺼번에 표시) ---------- */
   var guideItems=[
