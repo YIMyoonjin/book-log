@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>북로그</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#D8D4C8">
@@ -73,6 +73,9 @@
   .reg-card{background:rgba(255,255,255,.34); border:1.5px solid var(--line); border-radius:14px; padding:14px 16px;}
   .reg-cbtn{width:30px; height:30px; border-radius:50%; border:none; color:#fff; font-size:18px; font-weight:800; cursor:pointer; flex-shrink:0; line-height:1;}
   button{touch-action:manipulation;}
+  #guide{position:absolute; inset:0; z-index:300; display:none;}
+  #guide-hole{position:absolute; border:2px solid #F46A2A; border-radius:12px; box-shadow:0 0 0 9999px rgba(20,15,10,.62); transition:all .25s; pointer-events:none;}
+  #guide-bubble{position:absolute; left:22px; right:22px; background:var(--bg); border:2px solid #1B1B1B; border-radius:16px; padding:15px 17px;}
   .seg{display:flex; gap:8px; margin-top:8px;}
   .seg button{flex:1; height:42px; border:1.5px solid var(--ink); border-radius:10px; background:transparent; color:var(--ink); font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;}
   .seg button.on{background:var(--ora); border-color:var(--ora);}
@@ -274,6 +277,20 @@
     <div id="reg-body"></div>
   </div>
 
+  <!-- ONBOARDING GUIDE OVERLAY -->
+  <div id="guide">
+    <div id="guide-hole"></div>
+    <div id="guide-bubble">
+      <div class="pen" style="font-size:20px; color:var(--ora); transform:rotate(-3deg); line-height:1;">guide</div>
+      <div id="guide-text" style="font-size:14px; font-weight:600; line-height:1.55; margin-top:6px; color:var(--ink);"></div>
+      <div style="display:flex; align-items:center; gap:10px; margin-top:14px;">
+        <span id="guide-count" style="font-size:11px; color:var(--mut);"></span>
+        <button id="guide-skip" style="margin-left:auto; padding:8px 14px; border:1.5px solid #C2BBAB; background:transparent; border-radius:10px; font-family:inherit; font-weight:700; font-size:13px; cursor:pointer; color:var(--ink);">건너뛰기</button>
+        <button id="guide-next" class="blk" style="border:none; padding:9px 16px; cursor:pointer; font-size:13px;">다음</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -350,7 +367,37 @@
     document.getElementById('onboarding').style.display='none';
     document.getElementById('main').style.display='flex';
     initMain();
+    setTimeout(function(){ try{ startGuide(); }catch(e){} }, 500);
   }
+  /* ---------- 스크린 오버레이 가이드 ---------- */
+  var guideSteps=[
+    {sel:'#home-current', text:'지금 읽는 책이 여기에 보여요. 눌러서 진행률·별점·메모·독후감을 기록할 수 있어요.'},
+    {sel:'#home-add', text:'＋ 책 추가하기로 책을 검색해 등록하면 여기에 담겨요.'},
+    {sel:'.tabbar', text:'아래 탭에서 홈·서재·달력·통계·설정으로 이동할 수 있어요.'}
+  ];
+  var guideIdx=0;
+  function startGuide(){
+    try{ if(localStorage.getItem('booklog_guide_done')) return; }catch(e){}
+    guideIdx=0; document.getElementById('guide').style.display='block'; showGuideStep();
+  }
+  function showGuideStep(){
+    var step=guideSteps[guideIdx];
+    var app=document.getElementById('app'), el=step&&document.querySelector(step.sel);
+    if(!el){ guideIdx++; if(guideIdx>=guideSteps.length){ endGuide(); return; } return showGuideStep(); }
+    var r=el.getBoundingClientRect(), ar=app.getBoundingClientRect(), pad=8;
+    var hole=document.getElementById('guide-hole');
+    hole.style.left=(r.left-ar.left-pad)+'px'; hole.style.top=(r.top-ar.top-pad)+'px';
+    hole.style.width=(r.width+pad*2)+'px'; hole.style.height=(r.height+pad*2)+'px';
+    document.getElementById('guide-text').textContent=step.text;
+    document.getElementById('guide-count').textContent=(guideIdx+1)+' / '+guideSteps.length;
+    document.getElementById('guide-next').textContent=(guideIdx===guideSteps.length-1)?'완료':'다음';
+    var bubble=document.getElementById('guide-bubble'), topRel=r.top-ar.top, botRel=r.bottom-ar.top;
+    if(botRel > ar.height*0.55){ bubble.style.top=''; bubble.style.bottom=(ar.height-topRel+16)+'px'; }
+    else { bubble.style.bottom=''; bubble.style.top=(botRel+16)+'px'; }
+  }
+  function endGuide(){ document.getElementById('guide').style.display='none'; try{ localStorage.setItem('booklog_guide_done','1'); }catch(e){} }
+  document.getElementById('guide-next').onclick=function(){ guideIdx++; if(guideIdx>=guideSteps.length){ endGuide(); } else showGuideStep(); };
+  document.getElementById('guide-skip').onclick=endGuide;
   var mainInit=false;
   function initMain(){
     if(mainInit)return; mainInit=true;
@@ -513,7 +560,17 @@
       document.getElementById('btn-login').onclick=doLogin;
     }
   }
-  function doLogin(){ try{ var p=new firebase.auth.GoogleAuthProvider(); fbAuth.signInWithRedirect(p); }catch(e){ alert('로그인 준비 오류: '+e.message); } }
+  function doLogin(){
+    try{
+      var p=new firebase.auth.GoogleAuthProvider();
+      fbAuth.signInWithPopup(p).catch(function(e){
+        var c=(e&&e.code)||'';
+        if(c.indexOf('popup-blocked')>-1 || c.indexOf('operation-not-supported')>-1 || c.indexOf('disallowed')>-1){ fbAuth.signInWithRedirect(p); }
+        else if(c.indexOf('cancelled')>-1 || c.indexOf('closed')>-1){ /* 사용자 취소 */ }
+        else { alert('로그인 실패: '+(e&&e.message||e)); }
+      });
+    }catch(e){ alert('로그인 준비 오류: '+e.message); }
+  }
   var myBooks=[];
   function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function pctOf(b){ return b.totalPages?Math.round((b.currentPage||0)/b.totalPages*100):0; }
