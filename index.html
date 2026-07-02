@@ -31,7 +31,8 @@
   /* ONBOARDING */
   #onboarding{position:absolute; inset:0; z-index:100; display:flex; flex-direction:column; overflow:hidden;}
   #track{display:flex; width:400%; height:100%; transition:transform .42s cubic-bezier(.4,0,.2,1);}
-  .page{width:25%; height:100%; padding:34px 27px 0; overflow:hidden; display:flex; flex-direction:column;}
+  .page{width:25%; height:100%; padding:34px 27px 0; overflow:hidden; display:flex; flex-direction:column; position:relative;}
+  .pg-dim{position:absolute; inset:0; background:rgba(20,15,10,.5); z-index:1; pointer-events:none;}
   .big{font-size:72px; line-height:.82; color:var(--ora);}
   .penh{font-size:31px; color:var(--ink); margin-top:2px; transform:rotate(-3deg);}
   .obbar{position:absolute; bottom:0; left:0; right:0; padding:16px 27px calc(50px + env(safe-area-inset-bottom)); background:linear-gradient(transparent,var(--bg) 38%);}
@@ -77,8 +78,8 @@
   #guide-layer{position:absolute; inset:0;}
   .g-ring{position:absolute; border:2px solid #F46A2A; border-radius:12px; box-shadow:0 0 0 3px rgba(244,106,42,.2);}
   .g-lab{position:absolute; max-width:190px; background:var(--bg); border:1.5px solid #F46A2A; border-radius:12px; padding:9px 12px; font-size:13px; font-weight:700; line-height:1.45; color:var(--ink); box-shadow:0 2px 10px rgba(0,0,0,.35);}
-  .ob-ring{border:2px solid #F46A2A !important; border-radius:11px; box-shadow:0 0 0 3px rgba(244,106,42,.15);}
-  .ob-coach{margin-top:14px; background:rgba(255,255,255,.42); border:1.5px solid #F46A2A; border-radius:12px; padding:11px 13px; font-size:12.5px; font-weight:700; color:var(--ink); line-height:1.5; display:flex; gap:8px; align-items:flex-start;}
+  .ob-ring{border:2px solid #F46A2A !important; border-radius:11px; box-shadow:0 0 0 3px rgba(244,106,42,.25); position:relative; z-index:2; background:var(--bg);}
+  .ob-coach{margin-top:14px; background:var(--bg); border:1.5px solid #F46A2A; border-radius:12px; padding:11px 13px; font-size:12.5px; font-weight:700; color:var(--ink); line-height:1.5; display:flex; gap:8px; align-items:flex-start; position:relative; z-index:2;}
   .seg{display:flex; gap:8px; margin-top:8px;}
   .seg button{flex:1; height:42px; border:1.5px solid var(--ink); border-radius:10px; background:transparent; color:var(--ink); font-family:inherit; font-weight:700; font-size:13px; cursor:pointer;}
   .seg button.on{background:var(--ora); border-color:var(--ora);}
@@ -347,7 +348,7 @@
   buildCal(document.getElementById('ob-cal'),false);
   buildBars(document.getElementById('ob-bars'));
   buildObRecords();
-  function coachAfter(id, text){ var c=document.getElementById(id); if(!c) return; c.classList.add('ob-ring'); var lab=document.createElement('div'); lab.className='ob-coach'; lab.innerHTML='<span style="color:#F46A2A; font-weight:800;">✦</span><span>'+text+'</span>'; c.parentNode.insertBefore(lab, c.nextSibling); }
+  function coachAfter(id, text){ var c=document.getElementById(id); if(!c) return; c.classList.add('ob-ring'); var page=c.closest('.page'); if(page && !page.querySelector('.pg-dim')){ var dim=document.createElement('div'); dim.className='pg-dim'; page.appendChild(dim); } var lab=document.createElement('div'); lab.className='ob-coach'; lab.innerHTML='<span style="color:#F46A2A; font-weight:800;">✦</span><span>'+text+'</span>'; c.parentNode.insertBefore(lab, c.nextSibling); }
   coachAfter('ob-reading','표지·진행률·메모·별점·시작일을 한 곳에서 기록해요.');
   coachAfter('ob-list','완독한 책이 표지로 서재에 차곡차곡 쌓여요.');
   coachAfter('ob-cal','읽은 날에 그날 읽은 책 표지가 달력에 표시돼요.');
@@ -523,8 +524,20 @@
     } else { var el=document.getElementById('reg-pages'); if(el) el.placeholder='직접 입력'; }
   }
   function closeRegister(){ document.getElementById('register-screen').style.display='none'; }
+  function needLoginModal(){
+    var ov=document.createElement('div'); ov.style.cssText='position:absolute; inset:0; z-index:400; background:rgba(20,15,10,.55); display:flex; align-items:center; justify-content:center; padding:30px;';
+    var box=document.createElement('div'); box.style.cssText='background:var(--bg); border:2px solid #1B1B1B; border-radius:16px; padding:20px; max-width:300px; width:100%;';
+    box.innerHTML='<div style="font-weight:800; font-size:16px; margin-bottom:8px; color:var(--ink);">로그인이 필요해요</div><div style="font-size:13px; color:var(--mut); line-height:1.55;">기록을 저장하려면 구글 로그인이 필요해요. 아래 버튼을 누르면 설정 화면으로 이동해요. 거기서 <b>로그인</b> 버튼을 눌러주세요.</div>';
+    var btns=document.createElement('div'); btns.style.cssText='display:flex; gap:8px; margin-top:16px;';
+    var b1=document.createElement('button'); b1.textContent='닫기'; b1.style.cssText='flex:1; height:46px; border:1.5px solid #C2BBAB; background:transparent; border-radius:10px; font-family:inherit; font-weight:700; cursor:pointer; color:var(--ink);';
+    var b2=document.createElement('button'); b2.textContent='설정으로 이동'; b2.className='blk'; b2.style.cssText='flex:1.4; height:46px; border:none; border-radius:10px; font-weight:800; cursor:pointer;';
+    b1.onclick=function(){ ov.remove(); };
+    b2.onclick=function(){ ov.remove(); closeRegister(); closeSearch(); if(window._goTab) window._goTab('settings'); };
+    btns.appendChild(b1); btns.appendChild(b2); box.appendChild(btns); ov.appendChild(box);
+    document.getElementById('app').appendChild(ov);
+  }
   function saveRegister(){
-    if(!currentUser){ alert('로그인이 필요해요. 설정 탭에서 로그인해 주세요.'); return; }
+    if(!currentUser){ needLoginModal(); return; }
     var title=document.getElementById('reg-title').value.trim(); if(!title){ alert('책 제목을 입력해 주세요.'); return; }
     function splitc(id){ return document.getElementById(id).value.split(',').map(function(s){return s.trim();}).filter(Boolean); }
     var authors=splitc('reg-author'), translators=splitc('reg-translator');
@@ -736,16 +749,14 @@
   renderAccount();
 
   /* ---------- tabs ---------- */
-  var tabs=document.querySelectorAll('.tab');
-  tabs.forEach(function(t){
-    t.onclick=function(){
-      tabs.forEach(function(x){x.classList.remove('on');});
-      t.classList.add('on');
-      document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
-      document.getElementById('view-'+t.getAttribute('data-view')).classList.add('active');
-      document.querySelector('.content').scrollTop=0;
-    };
-  });
+  function goTab(view){
+    document.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('on', x.getAttribute('data-view')===view); });
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+    var el=document.getElementById('view-'+view); if(el) el.classList.add('active');
+    var c=document.querySelector('.content'); if(c) c.scrollTop=0;
+  }
+  document.querySelectorAll('.tab').forEach(function(t){ t.onclick=function(){ goTab(t.getAttribute('data-view')); }; });
+  window._goTab=goTab;
 })();
 </script>
 <script>

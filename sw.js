@@ -1,5 +1,5 @@
 // 북로그 서비스워커 — 수정 시마다 CACHE 버전 +1
-const CACHE = 'booklog-v6';
+const CACHE = 'booklog-v7';
 const ASSETS = [
   './',
   './index.html',
